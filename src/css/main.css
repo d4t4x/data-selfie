@@ -1,0 +1,21 @@
+body {
+    background-color: #000;
+}
+
+#user {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+}
+
+#user img {
+    width: 40px;
+    height: 40px;
+    background-color: #FFF;
+}
+
+#user a {
+    position: absolute;
+    top: 0;
+    right: 60px;
+}

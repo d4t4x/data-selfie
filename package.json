@@ -1,0 +1,25 @@
+{
+  "name": "ds_dev_env",
+  "version": "1.0.0",
+  "description": "Dev environment for Data Selfie.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "webpack",
+    "buildw": "webpack -w",
+    "buildprod": "NODE_ENV=prod webpack"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "clean-webpack-plugin": "^0.1.14",
+    "copy-webpack-plugin": "^4.0.0",
+    "dexie": "^1.5.1",
+    "expose-loader": "^0.7.1",
+    "jquery": "^3.1.1",
+    "lodash": "^4.16.6",
+    "moment": "^2.17.0",
+    "throttle-debounce": "^1.0.1",
+    "webpack": "^1.13.3"
+  }
+}

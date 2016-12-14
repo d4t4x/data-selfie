@@ -1,0 +1,35 @@
+{
+    "name": "Data Selfie",
+    "version": "0.0.5",
+    "description": "Collect and analyze data from your interactions on facebook.com.",
+    "background": {
+        "scripts": ["js/background.js"],
+        "persistent": false
+    },
+    "browser_action": {
+        "default_icon": "img/icon-48.png",
+        "default_title": "Data Selfie",
+        "default_popup": "views/popup.html"
+    },
+    "permissions": [
+        "storage", // to save options
+        "downloads" // to save local data in a json file == manage your downloads
+    ],
+    "icons": {
+        "48": "img/icon-48.png",
+        "128": "img/icon-128.png"
+    },
+    "content_scripts": [{
+        "matches": ["https://www.facebook.com/*", "http://www.facebook.com/*"],
+        "js": ["js/content.js"], // == read and change data on facebook.com
+        "css": ["css/fblayer.css"]
+    }],
+    "homepage_url": "http://dataselfie.it",
+    "manifest_version": 2,
+    "options_ui": {
+        "page": "views/options.html",
+        "chrome_style": true,
+        "open_in_tab": false
+    },
+    "omnibox": { "keyword": "ds" }
+}
