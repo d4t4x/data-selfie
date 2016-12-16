@@ -11,13 +11,7 @@
         "default_title": "Data Selfie",
         "default_popup": "views/popup.html"
     },
-    "permissions": [
-        "storage",
-        "webRequest",
-        "https://www.facebook.com/*",
-        "http://www.facebook.com/*",
-        "downloads"
-    ],
+    "permissions": ["storage", "webRequest", "https://www.facebook.com/*", "http://www.facebook.com/*", "downloads"],
     "icons": {
         "48": "img/icon-48.png",
         "128": "img/icon-128.png"

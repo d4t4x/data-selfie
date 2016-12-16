@@ -3,7 +3,6 @@ secrets.*
 test*.json
 
 *.zip
-*/Iconr
 
 # Logs
 logs
