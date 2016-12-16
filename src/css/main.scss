@@ -1,0 +1,23 @@
+$baseU: 10px;
+$w: #FFFFFF;
+$b: #000000;
+
+body {
+    background-color: $b;
+}
+
+#user {
+    position: absolute;
+    top: $baseU;
+    right: $baseU;
+    img {
+        width: 40px;
+        height: 40px;
+        border: 1px solid $w;
+    }
+    a {
+        position: absolute;
+        top: 0;
+        right: 60px;
+    }
+}

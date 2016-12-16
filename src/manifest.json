@@ -4,7 +4,7 @@
     "description": "Collect and analyze data from your interactions on facebook.com.",
     "background": {
         "scripts": ["js/background.js"],
-        "persistent": false
+        "persistent": true
     },
     "browser_action": {
         "default_icon": "img/icon-48.png",
@@ -13,6 +13,9 @@
     },
     "permissions": [
         "storage", // to save options
+        "webRequest",
+        "https://www.facebook.com/*",
+        "http://www.facebook.com/*",
         "downloads" // to save local data in a json file == manage your downloads
     ],
     "icons": {

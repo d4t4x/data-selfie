@@ -21,5 +21,12 @@
     "moment": "^2.17.0",
     "throttle-debounce": "^1.0.1",
     "webpack": "^1.13.3"
+  },
+  "devDependencies": {
+    "css-loader": "^0.26.1",
+    "node-sass": "^4.0.0",
+    "sass-loader": "^4.0.2",
+    "style-loader": "^0.13.1",
+    "webpack": "^1.14.0"
   }
 }

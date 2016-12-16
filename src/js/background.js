@@ -11,8 +11,10 @@ var greeting = "\n" +
     db,
     dbstores = {
         timespent: "++id, start, stop",
-        looked: "++id, postUrl, posterActivity, poster, posterId, postImg, desc, duration, sharer, sharerId, sharerActivity, timestamp",
-        pages: "++id, href, origin, pathname, timestamp, inSession"
+        looked: "++id, postUrl, postActivity, posters, postImg, postDesc, origLink, origPoster, origDesc, suggested, duration, timestamp",
+        pages: "++id, url, timestamp, inSession",
+        clicked: "++id, type, url, timestamp",
+        typed: "++id, content, timestamp"
     },
     session = false,
     helper = require("./background_helpers.js");
@@ -24,11 +26,11 @@ function generalListeners() {
     chrome.runtime.onMessage.addListener(function(req, sender, sendRes) {
         switch (req.type) {
             case "contentLoaded":
-                console.log("[>>]" + _.join(req.data, " - "));
-                db.pages.add({ href: req.data[1], origin: req.data[2], pathname: req.data[3], timestamp: helper.now(), inSession: req.data[0] << 0 }); // http://stackoverflow.com/a/14787812
-                if (req.data[0] == true) {
+                console.log("[>>] " + sender.tab.url + "\t" + sender.tab.status);
+                if (parseInt(req.data[0]) == 1) {
                     setTimestamp("start", req.type);
                 };
+                db.pages.add({ url: sender.tab.url, timestamp: helper.now(), inSession: req.data[0] });
                 break;
             case "blur":
                 setTimestamp("stop", req.type);
@@ -47,23 +49,50 @@ function generalListeners() {
                             rawImg: req.data[1]
                         },
                         profileLink: req.data[2],
-                        userId: req.data[3]
+                        userName: req.data[3]
                     }
                 });
                 break;
             case "backup":
                 helper.backup(db);
                 break;
-            case "save looked":
+            case "saveLooked":
                 db.looked.add(req.data);
+                break;
+            case "saveClicked":
+                db.clicked.add(req.data);
+                break;
+            case "saveTyped":
+                db.typed.add(req.data);
                 break;
         }
         return true;
     });
+    var lastWebReq = 0;
+    chrome.webRequest.onCompleted.addListener(function(info) {
+        var dif = info.timeStamp - lastWebReq;
+        if (dif > 1500 || lastWebReq == 0) {
+            helper.sendToContent(info.tabId);
+            console.log("%c[>>] new webRequest", helper.clog.fb);
+        }
+        lastWebReq = info.timeStamp;
 
-    // STATUS BAR KEY[keyword in manifest.json] + tab
+    }, {
+        urls: ["https://www.facebook.com/*", "http://www.facebook.com/*"],
+        types: ["image"]
+    });
+    // STATUS BAR [keyword in manifest.json] + tab
     chrome.omnibox.onInputEntered.addListener(function(text) {
-        alert('You just typed "' + text + '"');
+        switch (text) {
+            case "reset db":
+                helper.resetDB(db, initDB);
+                break;
+            case "delete db":
+                helper.resetDB(db);
+                break;
+            case "init db":
+                initDB();
+        }
     });
 }
 
@@ -110,7 +139,7 @@ function initOptions() {
         if (res.optionsMinLookedDuration == undefined) {
             chrome.storage.local.set({
                 "optionsBackup": 7,
-                "optionsMinLookedDuration": 3,
+                "optionsMinLookedDuration": 5,
                 "optionsReport": false
             });
             console.log("%cDefault [options][<<] set.", helper.clog.grey);
@@ -129,10 +158,6 @@ function storagePrep() {
             console.log("%c[DB][<<] timespent is empty.", helper.clog.magenta);
         };
     });
-    // for testing
-    // helper.resetDB(db, initDB);
-    // helper.getFromTimeRange(db.timespent, "start", moment().subtract(7, "d").format(), helper.now());
-    // helper.getEachRow(db.timespent);
 }
 
 function init() {

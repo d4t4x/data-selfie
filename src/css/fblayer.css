@@ -14,7 +14,7 @@
     width: 45px;
     height: 45px;
     line-height: 45px;
-    background-color: #E9EAED;
+    background-color: rgba(233, 234, 237, 0.85);
     text-align: center;
     padding: 0px;
     position: fixed;
@@ -28,23 +28,3 @@
 .ui-loader {
     display: none;
 }
-
-
-/*
-.logged {
-    border: 1px solid #A40025 !important;
-    transition: 0.2s;
-    -webkit-transition: 0.2s;
-}
-*/
-
-
-/*#dsSpent {
-    float: left;
-    text-align: right;
-    margin-left: 10px;
-    font-size: 13px;
-    line-height: 42px;
-    color: #ffffff;
-}
-*/

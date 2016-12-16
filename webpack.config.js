@@ -23,6 +23,12 @@ module.exports = {
         path: __dirname + "/build/js",
         filename: "[name].js"
     },
+    module: {
+        loaders: [{
+            test: /\.scss$/,
+            loaders: ["style-loader", "css-loader", "sass-loader"]
+        }]
+    },
     plugins: debug ? [
         new CleanWebpackPlugin(['build']),
         new webpack.ProvidePlugin({ '$': 'jquery', 'Dexie': 'dexie', 'moment': 'moment', '_': 'lodash' }),

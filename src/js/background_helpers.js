@@ -24,6 +24,9 @@ module.exports = {
             chrome.browserAction.setIcon({ path: "../img/icon-48-inactive.png" });
         }
     },
+    sendToContent: function(tabid) {
+        chrome.tabs.sendMessage(tabid, { webRequest: 1 });
+    },
     downloadBar: function() {
         setTimeout(function() {
             chrome.downloads.erase({ "state": "complete" });
@@ -60,33 +63,15 @@ module.exports = {
             if (_callback) { _callback(); };
         });
     },
-    getEachRow: function(_table) {
-        // do sth w/ each row
-        _table.each(function(row) {
-            console.log("[DB][<<]" + row);
-        });
-    },
-    getFromTimeRange: function(_table, _key, _from, _to) {
-        // e.g. db.timespent,
-        // "start",
-        // moment().subtract(7, "days").format()
-        // moment("2016-11-28T19:00:00-05:00").format()
-        _table.where(_key)
-            .between(_from, _to).toArray()
-            .then(function(rows) {
-                console.log("%c[DB][<<]" + rows, clog.magenta);
-                return rows;
-            });
-    },
     checkCrash: function(_db, _table) {
         _db.transaction("rw", _table, function() {
             _table.toCollection().last(function(last) {
                 if (last.stop == undefined) {
                     chrome.storage.local.get(null, function(res) {
-                        if (res.errorCloseWindow != undefined) {
-                            _table.update(last.id, { stop: res.errorCloseWindow.timestamp });
-                            chrome.storage.remove("errorCloseWindow");
-                            console.log("%c[DB][<<] updated stop of last session " + res.errorCloseWindow.timestamp, clog.magenta);
+                        if (res.closeWindow != undefined) {
+                            _table.update(last.id, { stop: res.closeWindow.timestamp });
+                            chrome.storage.remove("closeWindow");
+                            console.log("%c[DB][<<] updated stop of last session " + res.closeWindow.timestamp, clog.magenta);
                         } else {
                             // if for some reason, so the last session will be eliminated
                             _table.update(last.id, { stop: last.start });
@@ -98,7 +83,7 @@ module.exports = {
                 }
             });
         }).then(function() {
-            chrome.storage.local.remove("errorCloseWindow");
+            chrome.storage.local.remove("closeWindow");
         });
     }
 }

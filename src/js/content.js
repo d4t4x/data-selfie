@@ -1,8 +1,8 @@
 require('./libs/jquery.scrollstop.min.js');
-require('expose-loader?global!./content_scripts/global.js');
-var helper = require("./content_scripts/content_helpers.js"),
-    looked = require("./content_scripts/looked.js"),
-    typed = require("./content_scripts/typed.js"),
+require('expose-loader?global!./content_global.js');
+var helper = require("./content_helpers.js"),
+    looked = require("./content_looked.js"),
+    typed = require("./content_typed.js"),
     throttle = require('throttle-debounce/throttle'),
     init = {
         addClock: function() {
@@ -12,22 +12,23 @@ var helper = require("./content_scripts/content_helpers.js"),
         saveProfilePic: function() {
             var profileLink = window.global.profileInfo[0].href;
             var profilePic = window.global.profileInfo.children("img")[0].src;
-            var userId = window.global.profileInfo[0].firstChild.id.match(/\d{5,}/g)[0];
+            var userName = window.global.profileInfo.text();
             helper.convertImg(profilePic, function(dataUri, rawImg) {
-                helper.sendToBg("profilePic", [dataUri, rawImg, profileLink, userId]);
+                helper.sendToBg("profilePic", [dataUri, rawImg, profileLink, userName]);
             });
         },
         listeners: function() {
+            var _window = $(window);
             window.onblur = function() {
-                window.global.lookedFocused = false;
+                window.global.windowFocused = false;
                 looked.logic.logLooked(looked.logic.cachedObj, window.global.sec);
                 helper.sendToBg("blur", []);
             };
             window.onbeforeunload = function() {
                 helper.sendToBg("closeWindow", []);
-                if (window.global.lookedFocused == true) {
+                if (window.global.windowFocused == true) {
                     chrome.storage.local.set({
-                        "errorCloseWindow": {
+                        "closeWindow": {
                             "timestamp": helper.now()
                         }
                     });
@@ -35,72 +36,94 @@ var helper = require("./content_scripts/content_helpers.js"),
                 }
             };
             window.onfocus = function() {
-                window.global.lookedFocused = true;
-                // checkStopLooked("", "");
+                window.global.windowFocused = true;
+                if (looked.checkPhotoOverlay(200) == false) {
+                    looked.postsInView();
+                };
                 helper.sendToBg("focus", []);
             };
-            var count = 0;
             $.event.special.scrollstop.latency = 800;
-            $(window).on("scrollstop", throttle(2000, function() {
-                if (window.global.lookedFocused) {
-                    looked.looked();
+            _window.on("scrollstop", throttle(2000, function() {
+                if (window.global.windowFocused) {
+                    looked.postsInView();
                 }
             }));
+            var prevScrollPos = 0;
+            _window.on("scroll", throttle(2000, function() {
+                var curPos = _window.scrollTop(),
+                    dif = Math.abs(curPos - prevScrollPos);
+                if (dif > 800) {
+                    // scrolling a lot = stopped looking at the current post
+                    looked.logic.logLooked(looked.logic.cachedObj, window.global.sec);
+                }
+                prevScrollPos = curPos;
+            }));
+            chrome.runtime.onMessage.addListener(function(req, sen, res) {
+                if (req.webRequest) {
+                    console.log("webrequest image");
+                    looked.updateNewsFeed();
+                }
+            });
         }
-    }
+    },
+    clicked = {
+        init: function() {
+            $("#contentCol").click(function(e) {
+                var el = $(e.target);
+                // check like or external link
+                if (e.target.tagName.toLowerCase() == "a") {
+                    if (e.target.innerText == "Like") { // like
+                        var url = $(el.parents("._3ccb")[0]).find("a._5pcq").attr("href");
+                        helper.sendToBg("saveClicked", {
+                            type: "like",
+                            url: url,
+                            timestamp: helper.now()
+                        });
+                        console.log("clicked " + url);
+                    } else if (e.target.className.toLowerCase() == "_52c6") { // external link
+                        var url = el[0].href;
+                        helper.sendToBg("saveClicked", {
+                            type: "external",
+                            url: url,
+                            timestamp: helper.now()
+                        });
+                        console.log("clicked " + url);
+                    } else { // clicked to other location e.g user
+                        looked.checkLocChanged();
+                    };
+                } else {
+                    // not a link, then maybe an image
+                    looked.checkPhotoOverlay(1500);
+                }
+            });
+            var bluebar = $("#pagelet_bluebar");
+            bluebar.click(function(e) {
+                var fbSearchbar = $("#pagelet_bluebar").find("input[aria-expanded=true]");
+                if (fbSearchbar.length > 0 || e.target.className.indexOf("f_click") > -1) {
+                    window.global.lookedFocused = false;
+                };
+                looked.checkLocChanged();
+            })
+        }
+    };
 
-$(document).ready(function() {
+window.onload = function() {
     console.log("\n\n\n\n\nKabooom. Content script loaded.");
     looked.getMinLookedDuration();
-    var loc = window.location;
-    // this is the beginning, bg only starts tracking if profle img / logged in
     window.global.profileInfo = $("#pagelet_bluebar a[title='Profile']");
     if (window.global.profileInfo.length > 0) {
+        // this is the beginning, bg only starts tracking
+        // if profle img / logged in
+        helper.sendToBg("contentLoaded", [1]); // session true
         console.log("Tracking on this page.");
-        helper.sendToBg("contentLoaded", [true, loc.href, loc.origin, loc.pathname]);
         init.listeners();
         init.addClock();
         init.saveProfilePic();
         looked.init();
+        clicked.init();
+        typed.init();
     } else {
-        helper.sendToBg("contentLoaded", [false, loc.href, loc.origin, loc.pathname]);
+        helper.sendToBg("contentLoaded", [0]); // session false
         console.log("No tracking on this page.");
     };
-});
-
-
-
-// module.exports = function() {
-//     $("body").click(function(e) {
-//         // console.log(e);
-//         var pos = [e.pageX, e.pageY, e.clientX, e.clientY];
-//         var el = "";
-//         var inText = e.target.innerText;
-
-//         if (e.target.className == "_1mf _1mj") {
-//             var inTitle = e.toElement.offsetParent.firstChild.title;
-//             console.log("_1mf");
-//             el = inTitle;
-//         } else {
-//             if (inText.length < 1) {
-//                 el = e.target.title;
-//             } else {
-//                 el = inText.slice(0, 140);
-//             }
-//         }
-//         // checkStopLooked(e, el);
-//         clickedArr.push({
-//             "position": pos,
-//             "content": [el, e.target.href],
-//             "timestamp": Date.now()
-//         });
-//         console.log(clickedArr[clickedArr.length - 1].content);
-//         chrome.storage.local.set({ "dsClicks": clickedArr });
-//     });
-
-//     // click into video?
-// };
-
-
-// check if clicked - specific parent - then redirect to different actions
-// e.g. only check if in #stream_pagelet
+};
