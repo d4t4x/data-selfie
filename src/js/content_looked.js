@@ -131,72 +131,75 @@ module.exports = {
             window.global.minLookedDuration = res.optionsMinLookedDuration;
         });
     },
+    isInView: function(rect) {
+        return (rect.top > -1 * rect.height / 5 &&
+            rect.top < window.innerHeight / 2 &&
+            document.hasFocus());
+    },
+    highlightPost: function(posts) {
+        var infocusId;
+        for (var i = posts.length - 1; i >= 0; i--) {
+            var rect = posts[i].getBoundingClientRect();
+            if (this.isInView(rect) && $(posts[i]).find("h5").length > 0) {
+                window.global.lookedFocused = true;
+                console.log("looked for loop found element");
+
+                infocusId = posts[i].id;
+                var infocusEl = $("#" + infocusId);
+                infocusEl.addClass("highlighted");
+                posts.not(infocusEl).removeClass("highlighted");
+
+                // if the current infocus != the logged (one from saved before), i.e. if there is a new element in focus and if loggedId is not empty ()
+                if (logic.loggedId != infocusId && logic.loggedId != "") {
+                    // wrapup previous and init new logged element
+                    logic.logLooked(logic.cachedObj, window.global.sec, function() {
+                        logic.updateCacheObj(infocusId);
+                    });
+                    // log infocus element in loggedId to compare next infocus to
+                    logic.loggedId = infocusId;
+                    break;
+                } else if (logic.loggedId != infocusId && logic.loggedId == "") {
+                    // update a new logged element
+                    logic.updateCacheObj(infocusId);
+                    logic.loggedId = infocusId;
+                    break;
+                };
+            }
+        };
+    },
     postsInView: function() {
-        var posts = window.global.feed.find("div._4-u2.mbm._5v3q._4-u8").children($("div._3ccb._4-u8")),
-            infocusId,
-            wh = window.innerHeight,
-            isInView = function(rect) {
-                return (rect.top > -1 * rect.height / 5 &&
-                    rect.top < wh / 2 &&
-                    document.hasFocus());
-            };
+        var posts = window.global.feed.find("div._4-u2.mbm._5v3q._4-u8").children($("div._3ccb._4-u8"));
         // console.log(posts);
         if (posts.length == 0) {
             window.global.lookedFocused = false;
-        } else {
-            // native JS for loop is faster than each
-            for (var i = posts.length - 1; i >= 0; i--) {
-                var rect = posts[i].getBoundingClientRect();
-                if (isInView(rect) && $(posts[i]).find("h5").length > 0) {
-                    window.global.lookedFocused = true;
-
-                    infocusId = posts[i].id;
-                    var infocusEl = $("#" + infocusId);
-                    infocusEl.addClass("highlighted");
-                    posts.not(infocusEl).removeClass("highlighted");
-
-                    // if the current infocus != the logged (one from saved before), i.e. if there is a new element in focus and if loggedId is not empty ()
-                    if (logic.loggedId != infocusId && logic.loggedId != "") {
-                        // wrapup previous and init new logged element
-                        logic.logLooked(logic.cachedObj, window.global.sec, function() {
-                            logic.updateCacheObj(infocusId);
-                        });
-                        // log infocus element in loggedId to compare next infocus to
-                        logic.loggedId = infocusId;
-                        break;
-                    } else if (logic.loggedId != infocusId && logic.loggedId == "") {
-                        // update a new logged element
-                        logic.updateCacheObj(infocusId);
-                        logic.loggedId = infocusId;
-                        break;
-                    };
-                } else {
-                    window.global.lookedFocused = false;
-                }
-            };
+        } else if (window.global.overlayFocused == false) {
+            this.highlightPost(posts);
         }
     },
-    checkPhotoOverlay: function(delay) {
+    checkPhotoOverlay: function(delay, callback) {
         // delay because of the loading of the overlay
         setTimeout(function() {
             var photoOverlay = $("#photos_snowlift").css('z-index');
             if (photoOverlay == 'auto' || photoOverlay == undefined) {
-                // there is no overlay, callback is postsInView
-                return false;
+                // there is no overlay, so fire that callback
+                window.global.overlayFocused = false;
+                if (callback) { callback(); }
             } else {
                 // there is an overlay active
                 logic.logLooked(logic.cachedObj, window.global.sec);
+                window.global.overlayFocused = true;
                 window.global.lookedFocused == false;
-                return true;
             }
         }, delay);
     },
     checkLocChanged: function() {
-        if (window.global.loc != window.location.href) {
-            console.log("location change", window.global.loc, window.location.href)
-            logic.logLooked(logic.cachedObj, window.global.sec);
-            window.global.loc = window.location.href;
-        };
+        setTimeout(function() {
+            if (window.global.loc != window.location.href) {
+                console.log("location change", window.global.loc, window.location.href)
+                logic.logLooked(logic.cachedObj, window.global.sec);
+                window.global.loc = window.location.href;
+            };
+        }, 500);
     },
     updateNewsFeed: function() {
         window.global.feed = $("#stream_pagelet");

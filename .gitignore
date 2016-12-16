@@ -2,6 +2,9 @@
 secrets.*
 test*.json
 
+*.zip
+*/Iconr
+
 # Logs
 logs
 *.log
@@ -39,3 +42,13 @@ jspm_packages
 
 # Optional REPL history
 .node_repl_history
+src/js/Iconr
+src/js/libs/Iconr
+src/js/views/Iconr
+src/views/Iconr
+src/css/Iconr
+src/img/Iconr
+build/css/Iconr
+build/img/Iconr
+build/views/Iconr
+src/Iconr

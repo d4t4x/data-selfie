@@ -11,20 +11,14 @@
         "default_title": "Data Selfie",
         "default_popup": "views/popup.html"
     },
-    "permissions": [
-        "storage", // to save options
-        "webRequest",
-        "https://www.facebook.com/*",
-        "http://www.facebook.com/*",
-        "downloads" // to save local data in a json file == manage your downloads
-    ],
+    "permissions": ["storage", "webRequest", "https://www.facebook.com/*", "http://www.facebook.com/*", "downloads"],
     "icons": {
         "48": "img/icon-48.png",
         "128": "img/icon-128.png"
     },
     "content_scripts": [{
         "matches": ["https://www.facebook.com/*", "http://www.facebook.com/*"],
-        "js": ["js/content.js"], // == read and change data on facebook.com
+        "js": ["js/content.js"],
         "css": ["css/fblayer.css"]
     }],
     "homepage_url": "http://dataselfie.it",

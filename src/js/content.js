@@ -21,6 +21,7 @@ var helper = require("./content_helpers.js"),
             var _window = $(window);
             window.onblur = function() {
                 window.global.windowFocused = false;
+                window.global.lookedFocused = false;
                 looked.logic.logLooked(looked.logic.cachedObj, window.global.sec);
                 helper.sendToBg("blur", []);
             };
@@ -37,9 +38,9 @@ var helper = require("./content_helpers.js"),
             };
             window.onfocus = function() {
                 window.global.windowFocused = true;
-                if (looked.checkPhotoOverlay(200) == false) {
+                looked.checkPhotoOverlay(200, function() {
                     looked.postsInView();
-                };
+                });
                 helper.sendToBg("focus", []);
             };
             $.event.special.scrollstop.latency = 800;
@@ -60,7 +61,6 @@ var helper = require("./content_helpers.js"),
             }));
             chrome.runtime.onMessage.addListener(function(req, sen, res) {
                 if (req.webRequest) {
-                    console.log("webrequest image");
                     looked.updateNewsFeed();
                 }
             });
@@ -89,11 +89,12 @@ var helper = require("./content_helpers.js"),
                         });
                         console.log("clicked " + url);
                     } else { // clicked to other location e.g user
+                        looked.checkPhotoOverlay(1500);
                         looked.checkLocChanged();
                     };
                 } else {
-                    // not a link, then maybe an image
                     looked.checkPhotoOverlay(1500);
+                    looked.checkLocChanged();
                 }
             });
             var bluebar = $("#pagelet_bluebar");
