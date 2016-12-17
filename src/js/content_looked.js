@@ -106,7 +106,9 @@ var helper = require("./content_helpers.js"),
         startTimer: function() {
             var self = this;
             window.global.timer = setInterval(function() {
-                if (window.global.lookedFocused && window.global.windowFocused) {
+                if (window.global.lookedFocused &&
+                    window.global.windowFocused &&
+                    !window.global.overlayFocused) {
                     window.global.sec += 1;
                     self.updateClockSec(window.global.sec);
                 } else {
@@ -119,7 +121,16 @@ var helper = require("./content_helpers.js"),
             this.updateClockSec("");
         },
         updateClockSec: function(_sec) {
-            window.global.secEl.show().text(_sec);
+            window.global.secEl.text(_sec);
+            if (window.global.sec == 0) {
+                window.global.clock.fadeOut();
+            } else {
+                window.global.clock.fadeIn();
+            }
+        },
+        lookedFocusedFalse: function() {
+            window.global.lookedFocused = false;
+            $("#"+this.loggedId).removeClass("highlighted");
         },
         cachedObj: {},
     }
@@ -142,7 +153,7 @@ module.exports = {
             var rect = posts[i].getBoundingClientRect();
             if (this.isInView(rect) && $(posts[i]).find("h5").length > 0) {
                 window.global.lookedFocused = true;
-                console.log("looked for loop found element");
+                console.log("looked forloop found post");
 
                 infocusId = posts[i].id;
                 var infocusEl = $("#" + infocusId);
@@ -171,8 +182,10 @@ module.exports = {
         var posts = window.global.feed.find("div._4-u2.mbm._5v3q._4-u8").children($("div._3ccb._4-u8"));
         // console.log(posts);
         if (posts.length == 0) {
-            window.global.lookedFocused = false;
+            console.log("no posts in view");
+            logic.lookedFocusedFalse();
         } else if (window.global.overlayFocused == false) {
+            console.log("yes posts + no overlay");
             this.highlightPost(posts);
         }
     },
@@ -183,11 +196,13 @@ module.exports = {
             if (photoOverlay == 'auto' || photoOverlay == undefined) {
                 // there is no overlay, so fire that callback
                 window.global.overlayFocused = false;
+                console.log("no overlay", window.global.overlayFocused);
                 if (callback) { callback(); }
             } else {
                 // there is an overlay active
                 logic.logLooked(logic.cachedObj, window.global.sec);
                 window.global.overlayFocused = true;
+                console.log("yes overlay", window.global.overlayFocused);
                 window.global.lookedFocused == false;
             }
         }, delay);

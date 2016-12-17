@@ -7,6 +7,7 @@ var helper = require("./content_helpers.js"),
     init = {
         addClock: function() {
             $("body").append('<div id="clock"><span id="clocksec">' + 0 + '</span></div>');
+            window.global.clock = $("#clock");
             window.global.secEl = $("#clocksec");
         },
         saveProfilePic: function() {
@@ -21,7 +22,7 @@ var helper = require("./content_helpers.js"),
             var _window = $(window);
             window.onblur = function() {
                 window.global.windowFocused = false;
-                window.global.lookedFocused = false;
+                looked.logic.lookedFocusedFalse();
                 looked.logic.logLooked(looked.logic.cachedObj, window.global.sec);
                 helper.sendToBg("blur", []);
             };
@@ -46,6 +47,7 @@ var helper = require("./content_helpers.js"),
             $.event.special.scrollstop.latency = 800;
             _window.on("scrollstop", throttle(2000, function() {
                 if (window.global.windowFocused) {
+                    console.log("scrollstop check posts");
                     looked.postsInView();
                 }
             }));
@@ -68,18 +70,20 @@ var helper = require("./content_helpers.js"),
     },
     clicked = {
         init: function() {
-            $("#contentCol").click(function(e) {
+            $("body").click(function(e) {
                 var el = $(e.target);
                 // check like or external link
                 if (e.target.tagName.toLowerCase() == "a") {
-                    if (e.target.innerText == "Like") { // like
+                    if (el.text() == "Like" && el.attr("aria-pressed") == false) { // like, no unlike
                         var url = $(el.parents("._3ccb")[0]).find("a._5pcq").attr("href");
-                        helper.sendToBg("saveClicked", {
-                            type: "like",
-                            url: url,
-                            timestamp: helper.now()
-                        });
-                        console.log("clicked " + url);
+                        if (url != undefined) { // in case it's in overlay
+                            console.log("clicked " + url);
+                            helper.sendToBg("saveClicked", {
+                                type: "like",
+                                url: url,
+                                timestamp: helper.now()
+                            });
+                        }
                     } else if (e.target.className.toLowerCase() == "_52c6") { // external link
                         var url = el[0].href;
                         helper.sendToBg("saveClicked", {
@@ -88,23 +92,25 @@ var helper = require("./content_helpers.js"),
                             timestamp: helper.now()
                         });
                         console.log("clicked " + url);
-                    } else { // clicked to other location e.g user
+                    } else { // clicked to other location e.g user or image
+                        console.log("clicked something");
                         looked.checkPhotoOverlay(1500);
                         looked.checkLocChanged();
                     };
+                } else if (el.parents("#pagelet_bluebar")) {
+                    var bluebar = $("#pagelet_bluebar");
+                    var fbSearchbar = bluebar.find("input[aria-expanded=true]");
+                    if (fbSearchbar.length > 0 || e.target.className.indexOf("f_click") > -1) {
+                        looked.logic.lookedFocusedFalse();
+                        looked.logic.logLooked(looked.logic.cachedObj, window.global.sec);
+                    };
+                    looked.checkLocChanged();
                 } else {
+                    // clicked somewhere else
                     looked.checkPhotoOverlay(1500);
                     looked.checkLocChanged();
                 }
             });
-            var bluebar = $("#pagelet_bluebar");
-            bluebar.click(function(e) {
-                var fbSearchbar = $("#pagelet_bluebar").find("input[aria-expanded=true]");
-                if (fbSearchbar.length > 0 || e.target.className.indexOf("f_click") > -1) {
-                    window.global.lookedFocused = false;
-                };
-                looked.checkLocChanged();
-            })
         }
     };
 
