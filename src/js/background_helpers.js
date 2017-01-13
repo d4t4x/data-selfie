@@ -54,6 +54,26 @@ module.exports = {
             self.saveBackup(obj);
         });
     },
+    import: function(_db, data) {
+        _db.transaction("rw", _db.looked, _db.clicked, _db.typed, _db.timespent, function() {
+            for (var i = 0; i < data.looked.length; i++) {
+                _db.looked.add(_.omit(data.looked[i], ['id']));
+            }
+            for (var i = 0; i < data.clicked.length; i++) {
+                _db.clicked.add(_.omit(data.clicked[i], ['id']));
+            }
+            for (var i = 0; i < data.typed.length; i++) {
+                _db.typed.add(_.omit(data.typed[i], ['id']));
+            }
+            for (var i = 0; i < data.timespent.length; i++) {
+                _db.timespent.add(_.omit(data.timespent[i], ['id']));
+            }
+        }).then(function() {
+            console.log("%c[DB][<<] import complete", clog.magenta);
+        }).catch(function(err) {
+            console.error(err.stack);
+        });
+    },
     resetDB: function(_db, _callback) {
         _db.delete().then(function() {
             console.log("%c[DB][<<] deleted", clog.magenta);
@@ -84,6 +104,8 @@ module.exports = {
             });
         }).then(function() {
             chrome.storage.local.remove("closeWindow");
+        }).catch(function(err) {
+            console.error(err.stack);
         });
     }
 }

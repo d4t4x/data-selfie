@@ -74,16 +74,15 @@ var helper = require("./content_helpers.js"),
                 var el = $(e.target);
                 // check like or external link
                 if (e.target.tagName.toLowerCase() == "a") {
-                    if (el.text() == "Like" && el.attr("aria-pressed") == false) { // like, no unlike
-                        var url = $(el.parents("._3ccb")[0]).find("a._5pcq").attr("href");
-                        if (url != undefined) { // in case it's in overlay
-                            console.log("clicked " + url);
-                            helper.sendToBg("saveClicked", {
-                                type: "like",
-                                url: url,
-                                timestamp: helper.now()
-                            });
-                        }
+                    var url = $(el.parents("._3ccb")[0]).find("a._5pcq").attr("href");
+                    // url is undefined if it's in overlay
+                    if (el.attr("data-testid") == "fb-ufi-likelink" && url != undefined) {
+                        console.log("clicked " + url);
+                        helper.sendToBg("saveClicked", {
+                            type: "like",
+                            url: url,
+                            timestamp: helper.now()
+                        });
                     } else if (e.target.className.toLowerCase() == "_52c6") { // external link
                         var url = el[0].href;
                         helper.sendToBg("saveClicked", {

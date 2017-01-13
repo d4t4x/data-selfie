@@ -9,15 +9,9 @@ var greeting = "\n" +
     ".....................$$$$$$$$$$$$.....................\n\n",
     devMode = true,
     db,
-    dbstores = {
-        timespent: "++id, start, stop",
-        looked: "++id, postUrl, postActivity, posters, postImg, postDesc, origLink, origPoster, origDesc, suggested, duration, timestamp",
-        pages: "++id, url, timestamp, inSession",
-        clicked: "++id, type, url, timestamp",
-        typed: "++id, content, timestamp"
-    },
     session = false,
-    helper = require("./background_helpers.js");
+    helper = require("./background_helpers.js"),
+    dbstores = require("./dbstores.js");
 
 function generalListeners() {
     chrome.runtime.onInstalled.addListener(function() {
@@ -56,6 +50,12 @@ function generalListeners() {
             case "backup":
                 helper.backup(db);
                 break;
+            case "import":
+                helper.import(db, req.data.dataselfie);
+                break;
+            case "delete":
+                helper.resetDB(db, initDB);
+                break;
             case "saveLooked":
                 db.looked.add(req.data);
                 break;
@@ -71,12 +71,12 @@ function generalListeners() {
     var lastWebReq = 0;
     chrome.webRequest.onCompleted.addListener(function(info) {
         var dif = info.timeStamp - lastWebReq;
+        // limit the number of notifications sent to content
         if (dif > 1500 || lastWebReq == 0) {
             helper.sendToContent(info.tabId);
             console.log("%c[>>] new webRequest", helper.clog.fb);
         }
         lastWebReq = info.timeStamp;
-
     }, {
         urls: ["https://www.facebook.com/*", "http://www.facebook.com/*"],
         types: ["image"]

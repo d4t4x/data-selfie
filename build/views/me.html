@@ -1,14 +1,55 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <title>Data Selfie _ Me</title>
-    <script src="../js/me.js"></script>
+    <style>
+    body {
+        background-color: #000
+    }
+    </style>
 </head>
+
 <body>
     <div id="user">
-        <a href=""></a>
+        <div class="info">
+            <p>Data Selfie _
+                <a href=""></a>
+            </p>
+            <p>Online ______ <span id="last-session"></span></p>
+            <p>Total _______ <span id="total-time-spent"></span></p>
+        </div>
+    </div>
+    <div class="wrapper">
+        <div class="container" id="activity-container">
+            <div class="container-title">Activity</div>
+            <div class="content">
+                <p class="right"><span class="looked-text">looked</span> _ <span class="clicked-like-text">like</span> _ <span class="clicked-external-text">link clicked</span> _ <span class="typed-text">typed</span></p>
+                <div id="consumption-vis"></div>
+            </div>
+        </div>
+    </div>
+    <div class="wrapper" style="height: 200px">
+        <div class="container" id="top-user-container">
+            <div class="container-title">Top friends</div>
+            <div class="content" id="top-user">Ranked by time spent on their posts (in sec)<br><br></div>
+        </div>
+        <div class="container" id="top-page-container">
+            <div class="container-title">Top pages</div>
+            <div class="content" id="top-page">Ranked by time spent on their posts (in sec)<br><br></div>
+        </div>
+        <div class="container" id="top-topics-container">
+            <div class="container-title">Top topics</div>
+            <div class="content">
+                Lorem ipsum dolor sit amet, consectetur adipisicing elit. Blanditiis, aperiam sed ipsum animi. Est inventore expedita accusantium nemo deleniti nisi, voluptatibus, placeat reprehenderit at quibusdam dicta non! Libero, esse, iure! Lorem ipsum dolor sit amet, consectetur adipisicing elit. Illum, corporis possimus quas praesentium? Molestias quibusdam, iusto maxime consequuntur ut, tempore, aliquam accusantium fugiat cupiditate natus non quod. Beatae repellendus, porro.
+            </div>
+        </div>
+    </div>
+    <div id="status">
         <img></img>
     </div>
+    <script src="../js/me.js"></script>
 </body>
+
 </html>

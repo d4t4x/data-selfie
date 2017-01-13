@@ -97,6 +97,7 @@ var helper = require("./content_helpers.js"),
                 // if this fails, obj will not be saved in DB
                 // logic.cachedObj is still unchanged
                 _obj.duration = _sec;
+                _obj.timestamp = moment(helper.now()).subtract(_sec, 'seconds').format();
                 helper.sendToBg("saveLooked", _obj);
                 console.log("looked", _sec + " >= " + window.global.minLookedDuration, _obj.postActivity);
             };

@@ -1,23 +1,120 @@
-$baseU: 10px;
+$baseU: 10;
 $w: #FFFFFF;
 $b: #000000;
-
+$green: #00FF80;
+$blue: #0080FF;
+$magenta: #FF00B1;
+$yellow: #FFFF00;
+$red: #e91e53;
+$baseFontSize: 12;
+$fontFamily: "Menlo",
+monospace;
 body {
     background-color: $b;
+    color: $w;
+    font-family: $fontFamily;
+    font-weight: 100;
+    font-size: $baseFontSize + px;
+    margin: 0;
+}
+
+a {
+    color: $green;
+    text-decoration: none;
+}
+
+p {
+    padding: 0;
+    margin: 0;
+    line-height: 1.4em;
+}
+
+.right {
+    text-align: right;
+}
+
+.looked-text {
+    color: $green;
+}
+
+.clicked-external-text {
+    color: $magenta;
+}
+
+.clicked-like-text {
+    color: $blue;
+}
+
+.typed-text {
+    color: $yellow;
 }
 
 #user {
+    width: 100vw - $baseU * 2 + px;
+    padding: $baseU * 1 + px;
+    top: $baseU * 0 + px;
+    left: $baseU * 0 + px;
+    .info {}
+}
+
+#status {
     position: absolute;
-    top: $baseU;
-    right: $baseU;
+    width: 100vw;
+    top: $baseU * 0 + px;
+    left: $baseU * 0 + px;
+    text-align: right;
     img {
-        width: 40px;
-        height: 40px;
-        border: 1px solid $w;
+        -webkit-filter: grayscale(1) invert(1);
+        filter: grayscale(1) invert(1);
+        width: 50px;
+        height: 50px;
+        margin: $baseU * 1 + px;
+        background-color: $w;
+        border: 1px solid $b;
     }
-    a {
-        position: absolute;
-        top: 0;
-        right: 60px;
+}
+
+.wrapper {
+    display: flex;
+    margin: $baseU * 2 + px $baseU * 0.5 + px 0 $baseU * 0.5 + px;
+    .container {
+        flex-grow: 1;
+        flex-basis: 0;
+        height: 100%;
+        position: relative;
+        margin: $baseU * 0.5 + px;
+        border: 1px solid $w;
+        .container-title {
+            color: $red;
+            background-color: $b;
+            position: absolute;
+            padding: 0 4px;
+            top: -10px;
+            left: 5px;
+        }
+        .content {
+            padding: $baseU + px;
+        }
+    }
+}
+
+// consumption-vis
+#consumption-vis {
+    width: 100%;
+    .axis path,
+    .axis line {
+        fill: none;
+        stroke: #FFF;
+        stroke-dasharray: 1, 2;
+        shape-rendering: crispEdges;
+    }
+    .gridline {
+        stroke: #555;
+        stroke-dasharray: 3, 1;
+    }
+    .axis text {
+        font-family: $fontFamily;
+        font-size: 11px;
+        fill: #FFF;
     }
 }
