@@ -6,8 +6,8 @@
 - more bugs commented in source code under "// FIX"
 
 ### fix for most errors
-- "have you tried to turn it on and off again?" - refresh the Facebook tab or close and open a new one
+- "Have you tried turning it off and on again?" - refresh the Facebook tab or close and open a new one
 
 ### short cuts
-- STATUS BAR [keyword in manifest.json] + tab
-- reset db, delete db, init db
+- url bar, type "ds" + tab
+- available commands ```reset db```, ```delete db```, ```init db```
