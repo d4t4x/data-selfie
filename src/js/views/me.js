@@ -478,7 +478,7 @@ var loadPredictions = function(key) {
         }
 
         if (res.applymagicsauce && key == "applymagicsauce") {
-            body.find(".applymagicsauce-last span").append(moment(res.applymagicsauce.lastUpdated).format("MMM-DD-YY"));
+            body.find(".applymagicsauce-last span").text(moment(res.applymagicsauce.lastUpdated).format("MMM-DD-YY"));
             console.log("%cApply Magic Sauce prediction", helper.clog.green, res.applymagicsauce);
             var amsPreds = res.applymagicsauce.predData.predictions;
             var amsReligion = _.filter(amsPreds, function(item) {

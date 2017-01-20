@@ -14,6 +14,10 @@ var greeting = "\n" +
     dbstores = require("./dbstores.js");
 
 function generalListeners() {
+    chrome.runtime.onUpdateAvailable.addListener(function(details) {
+        alert('There is a new version (' + 1 + ') of Data Selfie available.\n\nIt will be updated soon or you can manually update it yourself by going to chrome://extensions. At the top right, check "Developer Mode". Click "Update extensions now" under "Developer mode".');
+        chrome.runtime.reload();
+    });
     chrome.runtime.onInstalled.addListener(function() {
         // console.log("onInstalled");
     });
@@ -133,7 +137,7 @@ function initDB(notify) {
         alert("There has been an error. Database was not initiated.");
     }).finally(function() {
         console.log("%c[DB][<<] opened", helper.clog.magenta);
-        if (notify != false){
+        if (notify != false) {
             alert("Database was initiated.");
         }
     });
