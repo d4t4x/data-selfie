@@ -55,6 +55,7 @@ function generalListeners() {
                 break;
             case "delete":
                 helper.resetDB(db, initDB);
+                chrome.storage.local.clear(initOptions);
                 break;
             case "saveLooked":
                 db.looked.add(req.data);
@@ -91,7 +92,7 @@ function generalListeners() {
                 helper.resetDB(db);
                 break;
             case "init db":
-                initDB();
+                initDB(true);
         }
     });
 }
@@ -122,15 +123,19 @@ function setTimestamp(status, event) {
     saveTimestamp(moment().format(), status, event);
 };
 
-function initDB() {
+function initDB(notify) {
     // if db already exists, dexie only opens
     db = new Dexie("DataSelfieLocalDB");
     db.version(1).stores(dbstores);
     db.open().catch(function(err) {
         console.log("%c[DB][<<] error", helper.clog.magenta);
         console.error(err.stack || err);
+        alert("There has been an error. Database was not initiated.");
     }).finally(function() {
         console.log("%c[DB][<<] opened", helper.clog.magenta);
+        if (notify != false){
+            alert("Database was initiated.");
+        }
     });
 }
 
@@ -138,9 +143,7 @@ function initOptions() {
     chrome.storage.local.get(null, function(res) {
         if (res.optionsMinLookedDuration == undefined) {
             chrome.storage.local.set({
-                "optionsBackup": 7,
-                "optionsMinLookedDuration": 5,
-                "optionsReport": false
+                "optionsMinLookedDuration": 5
             });
             console.log("%cDefault [options][<<] set.", helper.clog.grey);
         } else {
@@ -150,7 +153,7 @@ function initOptions() {
 }
 
 function storagePrep() {
-    initDB();
+    initDB(false);
     db.timespent.toArray().then(function(rows) {
         if (rows.length > 0) {
             helper.checkCrash(db, db.timespent);

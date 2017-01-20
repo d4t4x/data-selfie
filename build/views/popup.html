@@ -5,14 +5,24 @@
     <meta charset="UTF-8">
     <title>Data Selfie _ Options</title>
     <style>
-        button {
+        button, button:focus {
             width: 200px;
+            background-color: #FFF;
+            border: 1px solid #000;
+            padding: 10px 0;
+            margin: 2px 0;
+            outline:0;
+        }
+        button:hover {
+            background-color: #000;
+            color: #FFF;
+            cursor: pointer;
         }
     </style>
 </head>
 
 <body>
-    <p id="status">Keep using Facebook, there is not ennough data yet.</p>
+    <p id="status">Collect and analyze data from your interactions on facebook.com.</p>
     <button id="me" inactive>Your Data Selfie</button>
     <button id="backup">Export Your Data</button>
     <button id="import">Import Data</button>

@@ -70,8 +70,10 @@ module.exports = {
             }
         }).then(function() {
             console.log("%c[DB][<<] import complete", clog.magenta);
+            alert("Data was imported.");
         }).catch(function(err) {
             console.error(err.stack);
+            alert("There has been error, please try importing again.");
         });
     },
     resetDB: function(_db, _callback) {
@@ -81,6 +83,7 @@ module.exports = {
             console.error("%cCould not delete [DB][<<]", clog.magenta);
         }).finally(function() {
             if (_callback) { _callback(); };
+            alert("Database was deleted.");
         });
     },
     checkCrash: function(_db, _table) {
