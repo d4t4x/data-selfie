@@ -116,7 +116,7 @@ var helper = require("./content_helpers.js"),
 window.onload = function() {
     console.log("\n\n\n\n\nKabooom. Content script loaded.");
     looked.getMinLookedDuration();
-    window.global.profileInfo = $("#pagelet_bluebar a[title='Profile']");
+    window.global.profileInfo = $("#pagelet_bluebar a[data-testid='blue_bar_profile_link']");
     if (window.global.profileInfo.length > 0) {
         // this is the beginning, bg only starts tracking
         // if profle img / logged in
