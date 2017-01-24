@@ -33,4 +33,4 @@
 
 ## to do list
 - make tracking more stable (we need your help, please report any problems you run into)
-- improve the Data Selfie dashboard front end code (handlebars or similar instead of jquery append - I know horrible)
+- improve the Data Selfie Me page front end code (responsive, handlebars or similar instead of jquery append - I know horrible)
