@@ -1,5 +1,11 @@
 # dataselfie-dev
 
+## how to run
+
+- to make a build (folder) from src ```npm run build```
+- to maka a build and watch for changes ```npm run buildw```
+- to make a build and minify etc (see webpack.config.js) ```npm run buildprod```
+
 ## known bugs
 - posts like friendship anniversaries and memories are not considered, which sometimes leads to time being added to the previously looked at post
 - when Facebook tab has been in the background for a while and you go back the clock might not show up again
@@ -34,3 +40,9 @@
 ## to do list
 - make tracking more stable (we need your help, please report any problems you run into)
 - improve the Data Selfie Me page front end code (responsive, handlebars or similar instead of jquery append - I know horrible)
+
+## disclaimer
+
+This project is maintained by one developer as of now. Get in touch to be involved at hello@dataselfie.it.
+
+This was mainly tested in Chrome Version 55.0.2883.95 (64-bit) on a Macbook Pro with macOS Sierra 10.12.2 with Facebeook in English (US).
