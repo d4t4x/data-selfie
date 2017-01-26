@@ -361,6 +361,7 @@ p {
     }
     .tooltip {
         position: absolute;
+        z-index: 1000;
         width: 200px;
         pointer-events: none;
         overflow-wrap: break-word;

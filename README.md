@@ -5,10 +5,15 @@
 - to make a build (folder) from src ```npm run build```
 - to maka a build and watch for changes ```npm run buildw```
 - to make a build and minify etc (see webpack.config.js) ```npm run buildprod```
+- in your Chrome browser go to chrome://extensions/ and tick the box that says "Developer mode"
+- now click "Load unpacked extension..." and choose the build folder you just created
+- you can now use Data Selfie, the extension icon (the eye) should now appear in your toolbar
+- it is tracking if the eye is black (instead of gray) and if you can see a clock at the bottom left in your facebook window
 
 ## known bugs
 - posts like friendship anniversaries and memories are not considered, which sometimes leads to time being added to the previously looked at post
 - when Facebook tab has been in the background for a while and you go back the clock might not show up again
+- exporting your data can result in an invalid json file (that you can't import), when URLs contain double quotes " that are not excaped, you can do that manually by adding \ before the "
 - more bugs commented in source code under "// FIX"
 
 ## monitor your monitoring

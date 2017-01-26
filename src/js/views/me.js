@@ -698,7 +698,7 @@ var main = {
                         height: 'auto'
                     });
                 } else {
-                    $("#message").text("You have to use Facebook in this browser to see your analyzed and predicted data.").show();
+                    $("#message").text("Your local database is empty. You have to use Facebook in this browser to see your analyzed and predicted data.").show();
                 }
             }
         });
