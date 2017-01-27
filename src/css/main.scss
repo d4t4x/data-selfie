@@ -19,6 +19,7 @@ body {
     font-size: $baseFontSize + px;
     margin: 0;
     min-width: 1000px;
+    overflow: hidden;
 }
 
 a {
@@ -67,8 +68,10 @@ p {
 #status {
     position: absolute;
     width: 100vw;
+    padding: 0;
+    margin: 0;
     top: $baseU * 0 + px;
-    left: $baseU * 0 + px;
+    right: $baseU * 0 + px;
     text-align: right;
     img {
         -webkit-filter: grayscale(1) invert(1);

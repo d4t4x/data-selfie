@@ -168,6 +168,7 @@ var topList = {
         db.looked.filter(function(item) {
             return item.posters[0].type == type;
         }).toArray(function(arr) {
+            console.log(arr);
             // http://stackoverflow.com/a/38774930
             var capped = _(arr)
                 .groupBy('posters[0].name')
@@ -721,9 +722,9 @@ var main = {
                     topList.list("page");
                     topList.likes();
                     // prepare data and check, if a call needs to be made
-                    apis.prepareAlchemyCall();
-                    apis.preparePersonalityCall();
-                    apis.prepareApplyMagicSauceCall();
+                    // apis.prepareAlchemyCall();
+                    // apis.preparePersonalityCall();
+                    // apis.prepareApplyMagicSauceCall();
                 } else {
                     main.progressAnimation(false);
                 }

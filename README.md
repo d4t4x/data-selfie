@@ -10,12 +10,6 @@
 - you can now use Data Selfie, the extension icon (the eye) should now appear in your toolbar
 - it is tracking if the eye is black (instead of gray) and if you can see a clock at the bottom left in your facebook window
 
-## known bugs
-- posts like friendship anniversaries and memories are not considered, which sometimes leads to time being added to the previously looked at post
-- when Facebook tab has been in the background for a while and you go back the clock might not show up again
-- exporting your data can result in an invalid json file (that you can't import), when URLs contain double quotes " that are not excaped, you can do that manually by adding \ before the "
-- more bugs commented in source code under "// FIX"
-
 ## monitor your monitoring
 - open console in any Facebook tab (by pressing Alt+Cmd+J on a Mac)
 - you can see logs of what is happening in the background with Data Selfie
@@ -42,7 +36,14 @@
 - click triangle to expand the subitems
 - "DataSelfieLocalDB" contains all tracked data (this is not saved anywhere else(!), so be careful before clearing this storage)
 
+## known bugs
+- posts like friendship anniversaries and memories are not considered, which sometimes leads to time being added to the previously looked at post
+- when Facebook tab has been in the background for a while and you go back the clock might not show up again
+- exporting your data can result in an invalid json file (that you can't import), when URLs contain double quotes " that are not excaped, you can do that manually by adding \ before the "
+- more bugs commented in source code under "// FIX"
+
 ## to do list
+- eventually the size of the content you have looked at will be too big for our APIs - an error returns
 - make tracking more stable (we need your help, please report any problems you run into)
 - improve the Data Selfie Me page front end code (responsive, handlebars or similar instead of jquery append - I know horrible)
 
