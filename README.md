@@ -1,4 +1,4 @@
-# dataselfie-dev
+# Data Selfie
 
 ## how to run
 
