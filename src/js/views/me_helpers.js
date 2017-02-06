@@ -18,11 +18,12 @@ module.exports = {
     now: function() {
         return moment().format();
     },
-    getEachRow: function(_table) {
-        // do sth w/ each row
-        _table.each(function(row) {
-            console.log("[DB][<<]" + row);
-        });
+    escapeString: function(str) {
+        return str.replace(/([.*+?^=!:${}()|\[\]\/\\])/g, "\\$1");
+    },
+    replaceAll: function(str, find, replace) {
+        // http://stackoverflow.com/a/1144788
+        return str.replace(new RegExp(this.escapeString(find), 'g'), replace);
     },
     getFromTimeRange: function(_table, _key, _from, _to) {
         // e.g. db.timespent,

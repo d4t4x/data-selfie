@@ -9,17 +9,17 @@ $yellow: #FFFF00;
 $red: #e91e53;
 $w2: #CCC;
 $baseFontSize: 12;
-$fontFamily: "Menlo",
-monospace;
+$fontFamily: "Menlo", monospace;
+
 body {
     background-color: $b;
     color: $w;
     font-family: $fontFamily;
     font-weight: 100;
+    line-height: 1.4em;
     font-size: $baseFontSize + px;
     margin: 0;
     min-width: 1000px;
-    overflow: hidden;
 }
 
 a {
@@ -34,7 +34,7 @@ p {
 }
 
 .warning {
-    color: $magenta;
+    color: $red;
 }
 
 .right {
@@ -58,16 +58,24 @@ p {
 }
 
 #user {
-    width: 100vw - $baseU * 2 + px;
+    width: 60vw;
     padding: $baseU * 1 + px;
-    top: $baseU * 0 + px;
-    left: $baseU * 0 + px;
-    .info {}
+}
+
+#main {
+    width: 100%;
+    margin: 20px auto;
+}
+
+footer {
+    display: none;
+    padding: $baseU * 1 + px;
+    height: 100px;
+    margin: 50px 0 0 0;
 }
 
 #status {
     position: absolute;
-    width: 100vw;
     padding: 0;
     margin: 0;
     top: $baseU * 0 + px;
@@ -84,14 +92,38 @@ p {
     }
 }
 
-#legend {
-    // display: none;
+.tool-tip::before {
+    content: attr(data-tooltip);
+    background-color: rgba(80, 80, 80, 0.9);
+    color: $w;
+    width: 180px;
+    position: absolute;
+    z-index: 1000;
+    padding: 5px;
+    left: 0px;
+    top: 15px;
+    opacity: 0;
+    font-size: 11px;
+}
+
+.tool-tip:hover::before {
+    opacity: 1;
+}
+
+#legend div {
+    display: inline-block;
+    position: relative;
 }
 
 #the-good-stuff,
 #the-cool-stuff {
     opacity: 0;
-    width: 100vw;
+    width: inherit;
+    background-color: $b;
+}
+
+#the-good-stuff {
+    position: fixed;
 }
 
 #progressAnim {
@@ -102,15 +134,17 @@ p {
     background-image: repeating-linear-gradient(90deg, transparent, transparent 1px, rgba(255, 255, 255, 1) 3px, rgba(255, 255, 255, 1) 3px);
 }
 
-#message, #message2 {
-    width: calc(100vw - 20px);
+#init-message,
+#usage-message,
+#loading {
+    width: calc(100% - 20px);
     padding: 10px;
     display: none;
 }
 
 #funnel {
     height: $baseU * 2 + px;
-    margin: $baseU * 2 + px $baseU * 1.5 + px $baseU * 6 + px;
+    margin: $baseU * 2 + px $baseU * 1 + px $baseU * 4 + px $baseU * 1 + px;
     border-bottom: 1px solid $w;
     border-left: 1px solid $w;
     border-right: 1px solid $w;
@@ -129,9 +163,15 @@ p {
 
 .wrapper {
     display: flex;
+    width: inherit;
     list-style: none;
     padding: 0;
-    margin: $baseU * 1 + px $baseU * 0.5 + px $baseU * 4 + px $baseU * 0.5 + px;
+    margin: $baseU * 1 + px $baseU * 0 + px $baseU * 4 + px $baseU * 0 + px;
+    a {
+        color: $w2;
+        border-bottom: 1px solid $magenta;
+        text-decoration: none;
+    }
     &.col-1 li {
         width: 100%;
     }

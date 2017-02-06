@@ -74,16 +74,18 @@ var helper = require("./content_helpers.js"),
                 var el = $(e.target);
                 // check like or external link
                 if (e.target.tagName.toLowerCase() == "a") {
-                    var url = $(el.parents("._3ccb")[0]).find("a._5pcq").attr("href");
+                    var url = $(el.parents("._3ccb")[0]).find("a._5pcq").attr("href"),
+                        postsNum = looked.getPagePosts().length;
                     // url is undefined if it's in overlay
-                    if (el.attr("data-testid") == "fb-ufi-likelink" && url != undefined) {
+                    // postsNum, so only for newsfeed
+                    if (el.attr("data-testid") == "fb-ufi-likelink" && url != undefined &&  postsNum > 0 ) {
                         console.log("clicked " + url);
                         helper.sendToBg("saveClicked", {
                             type: "like",
                             url: url,
                             timestamp: helper.now()
                         });
-                    } else if (e.target.className.toLowerCase() == "_52c6") { // external link
+                    } else if (e.target.className.toLowerCase() == "_52c6" && postsNum > 0) { // external link
                         var url = el[0].href;
                         helper.sendToBg("saveClicked", {
                             type: "external",
@@ -92,7 +94,7 @@ var helper = require("./content_helpers.js"),
                         });
                         console.log("clicked " + url);
                     } else { // clicked to other location e.g user or image
-                        console.log("clicked something");
+                        console.log("clicked something not recorded");
                         looked.checkPhotoOverlay(1500);
                         looked.checkLocChanged();
                     };

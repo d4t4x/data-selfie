@@ -23,18 +23,23 @@
 
 ## access local data
 
-#### chrome local storage
-- you can access settings, your general user data and the prediction
-- open console in background page or Data Selfie Me page (Alt+Cmd+J on a Mac)
-- copy ```chrome.storage.local.get(function(data){console.log(data)})```
-- press Enter
-
 #### tracked data
 - open console in background page or Data Selfie Me page (Alt+Cmd+J on a Mac)
 - go to the "Application" tab
 - Storage > IndexedDB
 - click triangle to expand the subitems
 - "DataSelfieLocalDB" contains all tracked data (this is not saved anywhere else(!), so be careful before clearing this storage)
+
+#### chrome local storage
+- you can access settings, your general user data and the prediction
+    - open console in background page or Data Selfie Me page (Alt+Cmd+J on a Mac)
+    - copy ```chrome.storage.local.get(function(data){console.log(data)})```
+    - press Enter
+
+- you can delete your prediction to start new
+    - open console in background page or Data Selfie Me page (Alt+Cmd+J on a Mac)
+    - copy ```chrome.storage.local.remove(["alchemy", "applymagicsauce", "personality"])```
+    - press Enter
 
 ## known bugs
 - posts like friendship anniversaries and memories are not considered, which sometimes leads to time being added to the previously looked at post
@@ -43,9 +48,9 @@
 - more bugs commented in source code under "// FIX"
 
 ## to do list
-- eventually the size of the content you have looked at will be too big for our APIs - an error returns
+- refine the limit of data sent to IBM (Alchemy and Personality Insights), now only last 300 rows - add date (e.g. last 5 days from last time active)
 - make tracking more stable (we need your help, please report any problems you run into)
-- improve the Data Selfie Me page front end code (responsive, handlebars or similar instead of jquery append - I know horrible)
+- improve Your Data Selfie (Me) page front end code (responsive, handlebars or similar instead of jquery append - I know horrible)
 
 ## disclaimer
 

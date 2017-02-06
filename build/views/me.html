@@ -12,179 +12,198 @@
 </head>
 
 <body>
-    <div id="user">
+    <header id="user">
         <div class="info">
             <p>$ Data Selfie _
                 <a href="">_</a>
             </p>
             <p>$ Online ______ <span id="last-session">_</span></p>
             <p>$ Total _______ <span id="total-time-spent">_</span></p>
-            <p id="legend">$ Legend ______ <span class="looked-text">looked</span> _ <span class="clicked-like-text">liked</span> _ <span class="clicked-external-text">link clicked</span> _ <span class="typed-text">typed</span></p>
+            <div id="legend">$ Legend ______
+                <div class="looked-text tool-tip" data-tooltip="content from your newsfeed that you look at (e.g. >5sec, see options)">looked</div> _
+                <div class="clicked-like-text tool-tip" data-tooltip="posts you liked from your newsfeed">liked</div> _
+                <div class="clicked-external-text tool-tip" data-tooltip="links you clicked from your newsfeed">link clicked</div> _
+                <div class="typed-text tool-tip" data-tooltip="anything you typed e.g. comments, private messages etc.">typed</div>
+            </div>
+        </div>
+        <div id="status">
+            <img></img>
+        </div>
+    </header>
+    <div id="main">
+        <div id="progressAnim"></div>
+        <div id="init-message" style="display: none">Your local database is empty. You have to use Facebook in this browser to see your analyzed and predicted data. <br> Visit <a href="http://dataselfie.it/faq" target="_blank">FAQ + Terms of Use</a> for more info.</div>
+        <div id="the-cool-stuff">
+            <ul class="wrapper col-1">
+                <li>
+                    <div class="container" id="activity-container">
+                        <div class="container-title">Activity</div>
+                        <div class="content">
+                            <div id="consumption-vis"></div>
+                            <p class="last-updated">updated: <span>now</span></p>
+                        </div>
+                    </div>
+                </li>
+            </ul>
+            <ul class="wrapper col-3" id="top-wrapper">
+                <li>
+                    <div class="container" id="top-user-container">
+                        <div class="container-title">Top friends</div>
+                        <div class="content" id="top-user">
+                            <p>Time spent (in sec) on friends' posts</p>
+                            <p class="last-updated">updated: <span>now</span></p>
+                        </div>
+                    </div>
+                </li>
+                <li>
+                    <div class="container" id="top-page-container">
+                        <div class="container-title">Top pages</div>
+                        <div class="content" id="top-page">
+                            <p>Time spent (in sec) on pages' posts</p>
+                            <p class="last-updated">updated: <span>now</span></p>
+                        </div>
+                    </div>
+                </li>
+                <li>
+                    <div class="container" id="top-like-container">
+                        <div class="container-title">Top Likes</div>
+                        <div class="content" id="top-like">
+                            <p>Likes for posts, photos or videos</p>
+                            <p class="last-updated">updated: <span>now</span></p>
+                        </div>
+                    </div>
+                </li>
+            </ul>
+            <div id="funnel">
+                <div></div>
+            </div>
+            <div id="loading" style="display: none">Loading...</div>
+            <div id="usage-message"></div>
+        </div>
+        <div id="the-good-stuff">
+            <ul class="wrapper col-2" id="alchemy-wrapper">
+                <li>
+                    <div class="container" id="keywords-container">
+                        <div class="container-title">Keywords</div>
+                        <div class="tech-label" data-tooltip="Natural Language Processing from IBM Watson was used to generate this analysis.">NLP</div>
+                        <div class="content alchemy-content" id="">
+                            <p>Relevance (0 - 1) and sentiment (-1 - 1) of important keywords in the content you look at ranked by relevance</p>
+                            <div class="Rtable Rtable--4cols-s-s-m"></div>
+                            <p class="last-updated alchemy-last">updated: <span>-</span></p>
+                        </div>
+                    </div>
+                </li>
+                <li>
+                    <div class="container" id="entities-container">
+                        <div class="container-title">Entities</div>
+                        <div class="tech-label" data-tooltip="Natural Language Processing from IBM Watson was used to generate this analysis.">NLP</div>
+                        <div class="content alchemy-content" id="">
+                            <p>Relevance (0 - 1) and sentiment (-1 - 1) of people, organizations, places, a.o. from the content you look at</p>
+                            <div class="Rtable Rtable--4cols-s-s-m"></div>
+                            <p class="last-updated alchemy-last">updated: <span>-</span></p>
+                        </div>
+                    </div>
+                </li>
+            </ul>
+            <ul class="wrapper col-1-3" id="alchemy-ocean-wrapper">
+                <li>
+                    <div class="container" id="concepts-container">
+                        <div class="container-title">Concepts</div>
+                        <div class="tech-label" data-tooltip="Natural Language Processing from IBM Watson was used to generate this analysis.">NLP</div>
+                        <div class="content alchemy-content" id="">
+                            <p>Relevance (0 - 1) of general concepts that aren’t necessarily directly referenced in the content</p>
+                            <div class="Rtable Rtable--2cols"></div>
+                            <p class="last-updated alchemy-last">updated: <span>-</span></p>
+                        </div>
+                    </div>
+                </li>
+                <li>
+                    <div class="container" id="ocean-container">
+                        <div class="container-title">Personality Prediction</div>
+                        <div class="tech-label" data-tooltip="Machine Learning from IBM and the University of Cambridge was used to generate this analysis.">ML</div>
+                        <div class="content applymagicsauce-content" id="">
+                            <p>What you type and the facebook pages you see in your feed result in this prediction of your Big 5,
+                                <br>E.g. 20th percentile means 20% of general population has lower and 80% has higher score</p>
+                            <div id="ocean-vis"></div>
+                            <p class="last-updated applymagicsauce-last">updated: <span>-</span></p>
+                        </div>
+                    </div>
+                </li>
+            </ul>
+            <ul class="wrapper col-2-2-1" id="religion-politics-wrapper">
+                <li>
+                    <div class="container" id="religion-container">
+                        <div class="container-title">Religious Orientation</div>
+                        <div class="tech-label" data-tooltip="Machine Learning API from the University of Cambridge was used to generate this analysis.">ML</div>
+                        <div class="content applymagicsauce-content" id="">
+                            <p style="min-height: 50px;">The pages you see in your feed suggest this,
+                                <br>Other category includes Atheists, Agnostics, Buddhists, Jedis, Muslims, Pastafarians</p>
+                            <ul id="religion-chart"></ul>
+                            <p class="last-updated applymagicsauce-last">updated: <span>-</span></p>
+                        </div>
+                    </div>
+                </li>
+                <li>
+                    <div class="container" id="politics-container">
+                        <div class="container-title">Political Orientation</div>
+                        <div class="tech-label" data-tooltip="Machine Learning API from the University of Cambridge was used to generate this analysis.">ML</div>
+                        <div class="content applymagicsauce-content" id="">
+                            <p style="min-height: 50px;">The pages you see in your feed suggest this</p>
+                            <ul id="politics-chart"></ul>
+                            <p class="last-updated applymagicsauce-last">updated: <span>-</span></p>
+                        </div>
+                    </div>
+                </li>
+                <li>
+                    <div class="container" id="other-predictions-container">
+                        <div class="container-title">Other Predictions</div>
+                        <div class="tech-label" data-tooltip="Machine Learning API from the University of Cambridge was used to generate this analysis.">ML</div>
+                        <div class="content applymagicsauce-content" id="">
+                            <p>Based on pages in your feed,
+                                <br> the percentile is in relation to the general population</p>
+                            <div class="Rtable Rtable--2cols-m"></div>
+                            <p class="last-updated applymagicsauce-last">updated: <span>-</span></p>
+                        </div>
+                    </div>
+                </li>
+            </ul>
+            <ul class="wrapper col-2" id="consumption-pref-wrapper">
+                <li>
+                    <div class="container" id="shopping-container">
+                        <div class="container-title">Shopping Preferences</div>
+                        <div class="tech-label" data-tooltip="Machine Learning algorithm from IBM was used to generate this analysis.">ML</div>
+                        <div class="content personality-content" id="">
+                            <p>Based on what you type your personality (Big 5), values and needs are predicted and these preferences can be produced</p>
+                            <div class="Rtable Rtable--2cols-l"></div>
+                            <p class="last-updated personality-last">updated: <span>-</span></p>
+                        </div>
+                    </div>
+                </li>
+                <li>
+                    <div class="container" id="health-container">
+                        <div class="container-title">Health + Activity + Other Preferences</div>
+                        <div class="tech-label" data-tooltip="Machine Learning algorithm from IBM was used to generate this analysis.">ML</div>
+                        <div class="content personality-content" id="">
+                            <p>Based on what you type your personality (Big 5), values and needs are predicted and these preferences can be produced</p>
+                            <div class="Rtable Rtable--2cols-l"></div>
+                            <p class="last-updated personality-last">updated: <span>-</span></p>
+                        </div>
+                    </div>
+                </li>
+            </ul>
         </div>
     </div>
-    <div id="progressAnim"></div>
-    <div id="message"></div>
-    <div id="the-cool-stuff">
-        <ul class="wrapper col-1">
-            <li>
-                <div class="container" id="activity-container">
-                    <div class="container-title">Activity</div>
-                    <div class="content">
-                        <div id="consumption-vis"></div>
-                        <p class="last-updated">updated: <span>now</span></p>
-                    </div>
-                </div>
-            </li>
-        </ul>
-        <ul class="wrapper col-3" id="top-wrapper">
-            <li>
-                <div class="container" id="top-user-container">
-                    <div class="container-title">Top friends</div>
-                    <div class="content" id="top-user">
-                        <p>Time spent (in sec) on friends' posts</p>
-                        <p class="last-updated">updated: <span>now</span></p>
-                    </div>
-                </div>
-            </li>
-            <li>
-                <div class="container" id="top-page-container">
-                    <div class="container-title">Top pages</div>
-                    <div class="content" id="top-page">
-                        <p>Time spent (in sec) on pages' posts</p>
-                        <p class="last-updated">updated: <span>now</span></p>
-                    </div>
-                </div>
-            </li>
-            <li>
-                <div class="container" id="top-like-container">
-                    <div class="container-title">Top Likes</div>
-                    <div class="content" id="top-like">
-                        <p>Likes for posts, photos or videos</p>
-                        <p class="last-updated">updated: <span>now</span></p>
-                    </div>
-                </div>
-            </li>
-        </ul>
-        <div id="funnel">
-            <div></div>
+    <footer>
+        <div id="legend">$ Legend ______
+            <div class="looked-text tool-tip" data-tooltip="content from your newsfeed that you look at (e.g. >5sec, see options)">looked</div> _
+            <div class="clicked-like-text tool-tip" data-tooltip="posts you liked from your newsfeed">liked</div> _
+            <div class="clicked-external-text tool-tip" data-tooltip="links you clicked from your newsfeed">link clicked</div> _
+            <div class="typed-text tool-tip" data-tooltip="anything you typed e.g. comments, private messages etc.">typed</div>
         </div>
-    </div>
-    <div id="message2"></div>
-    <div id="the-good-stuff">
-        <ul class="wrapper col-2" id="alchemy-wrapper">
-            <li>
-                <div class="container" id="keywords-container">
-                    <div class="container-title">Keywords</div>
-                    <div class="tech-label" data-tooltip="Natural Language Processing was used to generate this data.">NLP</div>
-                    <div class="content alchemy-content" id="">
-                        <p>Relevance (0 - 1) and sentiment (-1 - 1) of important keywords in the content you look at ranked by relevance</p>
-                        <div class="Rtable Rtable--4cols-s-s-m"></div>
-                        <p class="last-updated alchemy-last">updated: <span>-</span></p>
-                    </div>
-                </div>
-            </li>
-            <li>
-                <div class="container" id="entities-container">
-                    <div class="container-title">Entities</div>
-                    <div class="tech-label" data-tooltip="Natural Language Processing was used to generate this data.">NLP</div>
-                    <div class="content alchemy-content" id="">
-                        <p>Relevance (0 - 1) and sentiment (-1 - 1) of people, organizations, places, a.o. from the content you look at</p>
-                        <div class="Rtable Rtable--4cols-s-s-m"></div>
-                        <p class="last-updated alchemy-last">updated: <span>-</span></p>
-                    </div>
-                </div>
-            </li>
-        </ul>
-        <ul class="wrapper col-1-3" id="alchemy-ocean-wrapper">
-            <li>
-                <div class="container" id="concepts-container">
-                    <div class="container-title">Concepts</div>
-                    <div class="tech-label" data-tooltip="Natural Language Processing was used to generate this data.">NLP</div>
-                    <div class="content alchemy-content" id="">
-                        <p>Relevance (0 - 1) of general concepts that aren’t necessarily directly referenced in the content</p>
-                        <div class="Rtable Rtable--2cols"></div>
-                        <p class="last-updated alchemy-last">updated: <span>-</span></p>
-                    </div>
-                </div>
-            </li>
-            <li>
-                <div class="container" id="ocean-container">
-                    <div class="container-title">Personality Prediction</div>
-                    <div class="tech-label" data-tooltip="Machine Learning was used to generate this data.">ML</div>
-                    <div class="content applymagicsauce-content" id="">
-                        <p>What you type and the facebook pages you see in your feed result in this prediction of your Big 5,
-                            <br>E.g. 20th percentile means 20% of general population has lower and 80% has higher score</p>
-                        <div id="ocean-vis"></div>
-                        <p class="last-updated applymagicsauce-last">updated: <span>-</span></p>
-                    </div>
-                </div>
-            </li>
-        </ul>
-        <ul class="wrapper col-2-2-1" id="religion-politics-wrapper">
-            <li>
-                <div class="container" id="religion-container">
-                    <div class="container-title">Religious Orientation</div>
-                    <div class="tech-label" data-tooltip="Machine Learning was used to generate this data.">ML</div>
-                    <div class="content applymagicsauce-content" id="">
-                        <p style="min-height: 50px;">The pages you see in your feed suggest this,
-                            <br>Other category includes Atheists, Agnostics, Buddhists, Jedis, Muslims, Pastafarians</p>
-                        <ul id="religion-chart"></ul>
-                        <p class="last-updated applymagicsauce-last">updated: <span>-</span></p>
-                    </div>
-                </div>
-            </li>
-            <li>
-                <div class="container" id="politics-container">
-                    <div class="container-title">Political Orientation</div>
-                    <div class="tech-label" data-tooltip="Machine Learning was used to generate this data.">ML</div>
-                    <div class="content applymagicsauce-content" id="">
-                        <p style="min-height: 50px;">The pages you see in your feed suggest this</p>
-                        <ul id="politics-chart"></ul>
-                        <p class="last-updated applymagicsauce-last">updated: <span>-</span></p>
-                    </div>
-                </div>
-            </li>
-            <li>
-                <div class="container" id="other-predictions-container">
-                    <div class="container-title">Other Predictions</div>
-                    <div class="tech-label" data-tooltip="Machine Learning was used to generate this data.">ML</div>
-                    <div class="content applymagicsauce-content" id="">
-                        <p>Based on pages in your feed,
-                            <br> the percentile is in relation to the general population</p>
-                        <div class="Rtable Rtable--2cols-m"></div>
-                        <p class="last-updated applymagicsauce-last">updated: <span>-</span></p>
-                    </div>
-                </div>
-            </li>
-        </ul>
-        <ul class="wrapper col-2" id="consumption-pref-wrapper">
-            <li>
-                <div class="container" id="shopping-container">
-                    <div class="container-title">Shopping Preferences</div>
-                    <div class="tech-label" data-tooltip="Machine Learning was used to generate this data.">ML</div>
-                    <div class="content personality-content" id="">
-                        <p>Based on what you type your personality (Big5), values and needs are predicted and these preferences can be produced</p>
-                        <div class="Rtable Rtable--2cols-l"></div>
-                        <p class="last-updated personality-last">updated: <span>-</span></p>
-                    </div>
-                </div>
-            </li>
-            <li>
-                <div class="container" id="health-container">
-                    <div class="container-title">Health + Activity + Other Preferences</div>
-                    <div class="tech-label" data-tooltip="Machine Learning was used to generate this data.">ML</div>
-                    <div class="content personality-content" id="">
-                        <p>Based on what you type your personality (Big5), values and needs are predicted and these preferences can be produced</p>
-                        <div class="Rtable Rtable--2cols-l"></div>
-                        <p class="last-updated personality-last">updated: <span>-</span></p>
-                    </div>
-                </div>
-            </li>
-        </ul>
-    </div>
-    <div id="status">
-        <img></img>
-    </div>
+        <br>
+        <p>Tool tips via hover throughout the page.</p>
+        <p>Visit <a href="http://dataselfie.it/faq" target="_blank">FAQ + Terms of Use</a> for more info.</p>
+    </footer>
     <script src="../js/me.js"></script>
 </body>
 

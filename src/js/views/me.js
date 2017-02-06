@@ -2,6 +2,10 @@ require("../../css/main.scss");
 console.log("Kaboom. Me page loaded.");
 var helper = require("./me_helpers.js"),
     dbstores = require("../dbstores.js"),
+    apiThreshold = require("../api-threshold.js"),
+    apiUrl = "http://api.dataselfie.it/",
+    // DEV server
+    // apiUrl = "http://localhost:3000/",
     db,
     d3 = require("d3"),
     body = $("body");
@@ -9,7 +13,7 @@ var helper = require("./me_helpers.js"),
 // consumption-vis
 var activity = {
     bodyW: window.innerWidth,
-    w: $("#consumption-vis").width(),
+    w: $("#consumption-vis").width() - 10, // for padding
     h: 0,
     pad: 20,
     lpad: 90,
@@ -98,7 +102,7 @@ var activity = {
             self.addPoints("elLooked", lookedArr, "#00FF80", "", 0);
         });
         db.clicked.filter(timeDiff).toArray(function(clickedArr) {
-            self.addPoints("elClicked", clickedArr, "#FF00B1", "#0080FF", 1);
+            self.addPoints("elClicked", clickedArr, "#0080FF", "#19E8FF", 1);
         });
         db.typed.filter(timeDiff).toArray(function(typedArr) {
             self.addPoints("elTyped", typedArr, "#FFFF00", "", 2);
@@ -128,7 +132,7 @@ var activity = {
                 if (d.type == undefined) {
                     return color1;
                 } else {
-                    return (d.type == "like") ? color2 : color1;
+                    return (d.type == "like") ? color1 : color2;
                 }
             })
             .on("mouseover", function(d) {
@@ -168,9 +172,8 @@ var topList = {
         db.looked.filter(function(item) {
             return item.posters[0].type == type;
         }).toArray(function(arr) {
-            console.log(arr);
             // http://stackoverflow.com/a/38774930
-            var capped = _(arr)
+            var modArr = _(arr)
                 .groupBy('posters[0].name')
                 .map(function(k, v) {
                     return {
@@ -178,8 +181,9 @@ var topList = {
                         duration: _.sumBy(k, 'duration')
                     }
                 })
-                .orderBy(['duration'], ['desc']).take(10).value();
-            console.log("%c" + type, helper.clog.green, capped);
+                .orderBy(['duration'], ['desc']).value();
+            var capped = _.take(modArr, 10);
+            console.log("%c" + type, helper.clog.green, modArr, capped);
             if (type == "user") {
                 var all = _.uniqBy(arr, "posters[0].name").length;
                 self.title(type, all);
@@ -226,8 +230,9 @@ var topList = {
                     addLike = function(i) {
                         db.looked.where("postUrl").startsWith("/" + orderedLikes[i].path).first(function(entry) {
                             var perc = _.round(orderedLikes[i].count / orderedLikes[0].count, 2) * 100,
-                                rest = 100 - perc;
-                            var html = '<span class="clicked-like-text tab">' + orderedLikes[i].count + '</span>\t' + entry.posters[0].name + '<br><div class="line" style="width: ' + perc + '%"></div><div class="line-dashed" style="width: ' + rest + '%"></div>';
+                                rest = 100 - perc,
+                                pName = (entry) ? entry.posters[0].name : orderedLikes[i].path;
+                            var html = '<span class="clicked-like-text tab">' + orderedLikes[i].count + '</span>\t' + pName + '<br><div class="line" style="width: ' + perc + '%"></div><div class="line-dashed" style="width: ' + rest + '%"></div>';
                             $("#top-like").append(html);
                             i++;
                             if (i < len) {
@@ -269,7 +274,8 @@ var nlpList = {
 }
 
 var oceanPlot = function(dataIBM, dataAMS) {
-    console.log("Big 5", dataIBM, dataAMS);
+    console.log("%cbig 5", helper.clog.yellow, dataIBM);
+    console.log("%cbig 5", helper.clog.green, dataAMS);
     $("#ocean-vis").html("");
     // SETUP
     w = $("#ocean-vis").width(),
@@ -452,7 +458,7 @@ var otherPredList = function(preds, interoprets) {
     var prob = (female.value >= 0.5) ? _.round(female.value * 100, 0) : _.round((1 - female.value) * 100, 0);
     var gender = (female.value >= 0.5) ? "Female" : "Male";
     html[2] = '<div class="looked-text cell">' + prob + '%</div><div class="cell">' + gender + ' (psychological gender)</div>';
-    var leadership = _.find(interoprets, {"trait": "Leadership"});
+    var leadership = _.find(interoprets, { "trait": "Leadership" });
     html[3] = '<div class="looked-text cell">' + _.round(leadership.value * 100, 0) + '%</div><div class="cell">' + leadership.trait + '</div>';
 
     $("#other-predictions-container .Rtable").append(_.join(html, ""));
@@ -466,16 +472,12 @@ var loadPredictions = function(key) {
             nlpList.list(res.alchemy.predData.concepts, "concepts");
             nlpList.sentList(res.alchemy.predData.entities, "entities");
             nlpList.sentList(res.alchemy.predData.keywords, "keywords");
-        } else {
-            $("#message2").text("There is not enough consumption. You should scroll through your feed more. ");
         }
 
         if (res.personality && key == "personality") {
             body.find(".personality-last span").text(moment(res.personality.lastUpdated).format("MMM-DD-YY"));
             console.log("%cPersonality prediction", helper.clog.yellow, res.personality);
             consumptionPrefList(res.personality.predData.consumption_preferences);
-        } else {
-            $("#message2").append("Consider typing more (e.g. commenting or private messages). So Data Selfie can predict your personality and shopping preferences o.a. ");
         }
 
         if (res.applymagicsauce && key == "applymagicsauce") {
@@ -499,36 +501,46 @@ var loadPredictions = function(key) {
             } else {
                 oceanPlot([], amsBig5);
             }
-        } else {
-            $("#message2").append("The more time you spend on Facebook the faster you will get your predictions. ");
         }
 
-        if (key == "reveal" && res.applymagicsauce && res.alchemy) {
-            setTimeout(function() {
-                $("#message2").hide();
-                $("#the-good-stuff").animate({ opacity: 1 }, 500);
-            }, 3000);
+        if (key == "reveal") {
+            $("#loading").delay(2000).hide(function() {
+                if (res.applymagicsauce) {
+                    // at least have some looked content enough to make an ams prediction
+                    // FIX delay and fade in
+                    $("#usage-message").delay(200).hide();
+                    $("#the-good-stuff").delay(200).css('position', 'relative').animate({ opacity: 1 }, 200);
+                } else {
+                    $("#usage-message").delay(200).show();
+                }
+                this.apiDone = false;
+            });
         }
-
-
     });
 };
 
 var apis = {
-    threshold: {
-        "alchemy": 400,
-        "personality": 200,
-        "applymagicsauce": 24
-    },
     fired: {
-        "alchemy": false,
-        "personality": false,
-        "applymagicsauce": false
+        "alchemy": 0,
+        "personality": 0,
+        "applymagicsauce": 0
     },
-    checkApisDone: function() {
+    apiErrors: 0,
+    apiDone: false,
+    checkApisDone: function(msg) {
+        if (msg == "error") {
+            this.apiErrors++;
+            if (this.apiErrors == 3) {
+                $("#usage-message").html('<span class="warning">attention:</span> Server error, please refresh page.')
+            } else {
+                $("#usage-message").html('<span class="warning">attention:</span> Not enough data yet. There is not enough consumption. You should scroll through your feed more, consider typing more (e.g. commenting or private messages), so Data Selfie can predict your personality and shopping preferences a.o. The more time you spend on Facebook the faster you will get your predictions.');
+            }
+        }
         var values = _.values(this.fired);
-        console.log("APIs in progress", values, _.uniq(values).length);
-        if (_.uniq(values).length == 1) {
+        console.log("APIs in progress", values, _.uniq(values));
+        if (_.uniq(values).length == 1 && _.uniq(values)[0] == 2) {
+            this.apiErrors = 0;
+            this.apiDone = true;
             loadPredictions("alchemy");
             loadPredictions("personality");
             loadPredictions("applymagicsauce");
@@ -539,18 +551,18 @@ var apis = {
         var self = this;
         $.ajax({
                 method: "POST",
-                url: "http://api.dataselfie.it/" + endpoint,
+                url: apiUrl + endpoint,
                 contentType: "application/json",
                 data: JSON.stringify(data)
             })
-            .done(function(msg) {
-                console.log("API response", msg);
+            .done(function(msg, obj) {
+                console.log("API response", endpoint, msg);
                 switch (endpoint) {
                     case "alchemy":
                         chrome.storage.local.set({
                             "alchemy": msg
                         }, function() {
-                            self.fired.alchemy = false;
+                            self.fired.alchemy = 2;
                             self.checkApisDone();
                         });
                         break;
@@ -558,7 +570,7 @@ var apis = {
                         chrome.storage.local.set({
                             "personality": msg
                         }, function() {
-                            self.fired.personality = false;
+                            self.fired.personality = 2;
                             self.checkApisDone();
                         });
                         break;
@@ -566,7 +578,7 @@ var apis = {
                         chrome.storage.local.set({
                             "applymagicsauce": msg
                         }, function() {
-                            self.fired.applymagicsauce = false;
+                            self.fired.applymagicsauce = 2;
                             self.checkApisDone();
                         });
                         break;
@@ -575,55 +587,72 @@ var apis = {
             .fail(function(err) {
                 chrome.storage.local.get(endpoint, function(res) {
                     if (!res[endpoint]) {
-                        // FIX
-                        // different statusCodes, will they replace data in local storage?
-                        //
-                        console.log("%cAPI error", helper.clog.red, err.status, err.responseText);
-                        body.find("." + endpoint + "-content").append('<p class="error">Sorry, there has been a problem with retrieving this analysis (' + err.status + '). One possible reason is that there is not enough data. Try again later.</p>');
+                        body.find("." + endpoint + "-content").append('<p class="error">Sorry, there has been a problem with retrieving this analysis ( Status ' + err.status + '). Try again later. If the problem persists, please email us at support@dataselfie.it.</p>');
                     }
                 });
+            })
+            .always(function(jqXHR, textStatus) {
+                self.fired[endpoint] = 2;
+                self.checkApisDone("error");
+                console.log("API status", endpoint, jqXHR.status, textStatus);
             });
     },
     newCall: function(key, newlength, callback) {
-        var threshold = this.threshold[key];
+        var self = this;
+        var threshold = apiThreshold[key];
         chrome.storage.local.get(key, function(res) {
             var last = (!res[key]) ? moment() : moment(res[key].lastUpdated);
             var now = moment();
             var diffLength = (!res[key]) ? newlength : newlength - res[key].dataLength;
-            if ((now.diff(last, "days") > 7 && diffLength > threshold * 0.5) || (diffLength > threshold)) {
-                // data seems ready for new call to API
+            // if data older than 5 days, difference from prev data at least half of threshold, applymagicsauce likes more than 10
+            // OR if difference from prev data at least threshold, applymagicsauce likes more than 10
+            if ((now.diff(last, "days") > 5 && diffLength != 0 && newlength > 10) || (diffLength >= threshold && newlength > 10)) {
+                console.log("Yes API call. Enough new content or enough time passed since last call.", key, diffLength, ">", threshold);
                 callback();
             } else {
-                console.log("No API call. Visualize saved data.");
-                loadPredictions(key);
-                loadPredictions("reveal");
+                console.log("No API call. Not enough new content.", key, diffLength, "<", threshold);
+                self.fired[key] = 2;
+                self.checkApisDone();
             }
         });
+    },
+    truncate: function(str, max) {
+        var strArr = str.split(" $+-+$ ");
+        // take the last posts according to value of max
+        return strArr.slice(strArr.length - 1 - max, strArr.length - 1).join(" ");
     },
     prepareAlchemyCall: function() {
         var self = this,
             desc = "";
         db.looked.toArray(function(arr) {
             for (var i = 0; i < arr.length; i++) {
-                desc += _.join(arr[i].postDesc, " ") + " " + _.join(arr[i].origDesc, " ") + " ";
+                desc += _.join(arr[i].postDesc, " ") + " " + _.join(arr[i].origDesc, " ") + " $+-+$ ";
             }
         }).then(function() {
-            console.log("%clooked descriptions", helper.clog.green, desc);
-            self.newCall("alchemy", desc.split(" ").length, function() {
-                self.fired.alchemy = true;
-                self.postReq("alchemy", { "desc": desc });
+            var truncDesc = self.truncate(desc, apiThreshold.alchemyMax),
+                origLen = desc.split(" ").length,
+                cleanDesc = helper.replaceAll(desc, " $+-+$ ", " ");
+            console.log("%clooked descriptions", helper.clog.green, cleanDesc, origLen, "(total) - sent:", truncDesc.split(" ").length);
+            // sending over the original length
+            // but make prediction based on truncated/most recent data
+            self.newCall("alchemy", origLen, function() {
+                self.fired.alchemy = 1;
+                self.postReq("alchemy", { "desc": truncDesc, "length": origLen });
             });
         });
     },
     preparePersonalityCall: function() {
         var self = this;
         db.typed.toArray(function(arr) {
-            return _(arr).map("content").join(" ");
+            return _(arr).map("content").join(" $+-+$ ");
         }).then(function(typed) {
-            console.log("%ctyped content", helper.clog.yellow, typed);
-            self.newCall("personality", typed.split(" ").length, function() {
-                self.fired.personality = true;
-                self.postReq("personality", { "typed": typed });
+            var truncTyped = self.truncate(typed, apiThreshold.personalityMax),
+                origLen = typed.split(" ").length,
+                cleanTyped = helper.replaceAll(typed, " $+-+$ ", " ");
+            console.log("%ctyped content", helper.clog.yellow, cleanTyped, origLen, "(total) - sent:", truncTyped.split(" ").length);
+            self.newCall("personality", origLen, function() {
+                self.fired.personality = 1;
+                self.postReq("personality", { "typed": truncTyped, "length": origLen });
             });
         });
     },
@@ -636,7 +665,7 @@ var apis = {
             topList.title("page", likeids.length);
             console.log("%cfacebook pages ids", helper.clog.green, likeids);
             self.newCall("applymagicsauce", likeids.length, function() {
-                self.fired.applymagicsauce = true;
+                self.fired.applymagicsauce = 1;
                 self.postReq("applymagicsauce", { "likeids": likeids });
             });
         });
@@ -692,17 +721,30 @@ var main = {
             complete: function() {
                 $(this).hide();
                 if (showAnalysis) {
+                    if (!apis.apiDone) {
+                        $("#loading").show();
+                    }
                     $("#the-cool-stuff").animate({ opacity: 1 }, 500);
-                    $("#message2").prepend('<span class="warning">attention</span>: Not enough data yet. ').show();
                     $('html, body').css({
                         overflow: 'auto',
                         height: 'auto'
                     });
+                    $("footer").show();
                 } else {
-                    $("#message").text("Your local database is empty. You have to use Facebook in this browser to see your analyzed and predicted data.").show();
+                    $("#init-message").show();
                 }
             }
         });
+    },
+    getApiThreshold: function() {
+        $.ajax({
+                method: "GET",
+                url: apiUrl + "api/threshold",
+            })
+            .done(function(msg) {
+                apiThreshold = msg;
+                console.log("%cServer call for thresholds.", helper.clog.magenta, apiThreshold);
+            });
     },
     initDB: function() {
         db = new Dexie("DataSelfieLocalDB");
@@ -722,9 +764,9 @@ var main = {
                     topList.list("page");
                     topList.likes();
                     // prepare data and check, if a call needs to be made
-                    // apis.prepareAlchemyCall();
-                    // apis.preparePersonalityCall();
-                    // apis.prepareApplyMagicSauceCall();
+                    apis.prepareAlchemyCall();
+                    apis.preparePersonalityCall();
+                    apis.prepareApplyMagicSauceCall();
                 } else {
                     main.progressAnimation(false);
                 }
@@ -735,4 +777,5 @@ var main = {
 
 $(document).ready(function() {
     main.initDB();
+    main.getApiThreshold();
 });

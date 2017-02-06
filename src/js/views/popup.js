@@ -29,6 +29,15 @@ $(document).click(function(e) {
     }
 })
 
+function IsJsonString(str) {
+    try {
+        JSON.parse(str);
+    } catch (e) {
+        return false;
+    }
+    return true;
+}
+
 function readSingleFile(e) {
     var file = e.target.files[0];
     if (!file) {
@@ -36,11 +45,18 @@ function readSingleFile(e) {
     }
     var reader = new FileReader();
     reader.onload = function(e) {
-        var data = JSON.parse(e.target.result);
-        chrome.runtime.sendMessage({
-            type: "import",
-            data: data
-        });
+        if (IsJsonString(e.target.result)) {
+            var data = JSON.parse(e.target.result);
+            chrome.runtime.sendMessage({
+                type: "import",
+                data: data
+            });
+        } else {
+            chrome.runtime.sendMessage({
+                type: "import",
+                data: []
+            });
+        }
     };
     reader.readAsText(file);
 }

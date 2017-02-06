@@ -123,10 +123,10 @@ var helper = require("./content_helpers.js"),
         },
         updateClockSec: function(_sec) {
             window.global.secEl.text(_sec);
-            if (window.global.sec == 0) {
-                window.global.clock.fadeOut();
-            } else {
+            if (window.global.windowFocused) {
                 window.global.clock.fadeIn();
+            } else {
+                window.global.clock.fadeOut();
             }
         },
         lookedFocusedFalse: function() {
@@ -179,14 +179,18 @@ module.exports = {
             }
         };
     },
-    postsInView: function() {
+    getPagePosts: function() {
         var posts = window.global.feed.find("div._4-u2.mbm._5v3q._4-u8").children($("div._3ccb._4-u8"));
         // console.log(posts);
+        return posts;
+    },
+    postsInView: function() {
+        var posts = this.getPagePosts();
         if (posts.length == 0) {
-            console.log("no posts in view");
+            console.log("no newsfeed posts in view");
             logic.lookedFocusedFalse();
         } else if (window.global.overlayFocused == false) {
-            console.log("yes posts + no overlay");
+            console.log("yes newsfeed posts + no overlay");
             this.highlightPost(posts);
         }
     },

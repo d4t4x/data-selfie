@@ -19,7 +19,15 @@ function generalListeners() {
         chrome.runtime.reload();
     });
     chrome.runtime.onInstalled.addListener(function() {
-        // console.log("onInstalled");
+        console.log("onInstalled");
+        // FIX with proper escaping
+        // db.pages.each(function(row) {
+        //     var escapedUrl = helper.escapeString(row.url);
+        //     if (escapedUrl != row.url) {
+        //         console.log(row.url, escapedUrl);
+        //         db.pages.put({ id: row.id, url: escapedUrl });
+        //     }
+        // });
     });
     chrome.runtime.onMessage.addListener(function(req, sender, sendRes) {
         switch (req.type) {
@@ -28,6 +36,7 @@ function generalListeners() {
                 if (parseInt(req.data[0]) == 1) {
                     setTimestamp("start", req.type);
                 };
+                // FIX proper escaping of url
                 db.pages.add({ url: sender.tab.url, timestamp: helper.now(), inSession: req.data[0] });
                 break;
             case "blur":
@@ -55,7 +64,11 @@ function generalListeners() {
                 helper.backup(db);
                 break;
             case "import":
-                helper.import(db, req.data.dataselfie);
+                if (req.data.dataselfie != undefined) {
+                    helper.import(db, req.data.dataselfie);
+                } else {
+                    helper.importError();
+                }
                 break;
             case "delete":
                 helper.resetDB(db, initDB);
