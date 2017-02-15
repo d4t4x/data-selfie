@@ -56,4 +56,4 @@
 
 This project is maintained by one developer as of now. Get in touch to be involved at hello@dataselfie.it.
 
-This was mainly tested in Chrome Version 55.0.2883.95 (64-bit) on a Macbook Pro with macOS Sierra 10.12.2 with Facebeook in English (US).
+This was mainly tested in Chrome Version 55.0.2883.95 (64-bit) on a Macbook Pro with macOS Sierra 10.12.2 with Facebook in English (US).
