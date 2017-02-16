@@ -11,8 +11,9 @@ module.exports = {
             canvas.width = this.naturalWidth;
             canvas.height = this.naturalHeight;
             canvas.getContext('2d').drawImage(this, 0, 0);
-            callback(canvas.toDataURL('image/png'),
-                canvas.toDataURL('image/png')
+            var dataURL = canvas.toDataURL('image/png');
+            callback(dataURL,
+                dataURL
                 .replace(/^data:image\/(png|jpg);base64,/,
                     ''));
         };
