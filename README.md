@@ -3,7 +3,7 @@
 ## how to run
 
 - to make a build (folder) from src ```npm run build```
-- to maka a build and watch for changes ```npm run buildw```
+- to make a build and watch for changes ```npm run buildw```
 - to make a build and minify etc (see webpack.config.js) ```npm run buildprod```
 - in your Chrome browser go to chrome://extensions/ and tick the box that says "Developer mode"
 - now click "Load unpacked extension..." and choose the build folder you just created
