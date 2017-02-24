@@ -44,7 +44,7 @@
 ## known bugs
 - posts like friendship anniversaries and memories are not considered, which sometimes leads to time being added to the previously looked at post
 - when Facebook tab has been in the background for a while and you go back the clock might not show up again
-- exporting your data can result in an invalid json file (that you can't import), when URLs contain double quotes " that are not excaped, you can do that manually by adding \ before the "
+- exporting your data can result in an invalid json file (that you can't import), when URLs contain double quotes " that are not escaped, you can do that manually by adding \ before the "
 - more bugs commented in source code under "// FIX"
 
 ## to do list

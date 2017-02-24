@@ -453,7 +453,7 @@ var otherPredList = function(preds, interoprets) {
     var intelligent = _.find(preds, { "trait": "Intelligence" });
     html[0] = '<div class="looked-text cell">' + _.round(intelligent.value * 100, 0) + 'th percentile</div><div class="cell">' + intelligent.trait + '</div>';
     var satisfied = _.find(preds, { "trait": "Satisfaction_Life" });
-    html[1] = '<div class="looked-text cell">' + _.round(satisfied.value * 100, 0) + 'th percentile</div><div class="cell">Life Satisfacton</div>';
+    html[1] = '<div class="looked-text cell">' + _.round(satisfied.value * 100, 0) + 'th percentile</div><div class="cell">Life Satisfaction</div>';
     var female = _.find(preds, { "trait": "Female" });
     var prob = (female.value >= 0.5) ? _.round(female.value * 100, 0) : _.round((1 - female.value) * 100, 0);
     var gender = (female.value >= 0.5) ? "Female" : "Male";
@@ -587,7 +587,7 @@ var apis = {
             .fail(function(err) {
                 chrome.storage.local.get(endpoint, function(res) {
                     if (!res[endpoint]) {
-                        body.find("." + endpoint + "-content").append('<p class="error">Sorry, there has been a problem with retrieving this analysis ( Status ' + err.status + '). Try again later. If the problem persists, please email us at support@dataselfie.it.</p>');
+                        body.find("." + endpoint + "-content").append('<p class="error">Sorry, there has been a problem with retrieving this analysis (Status ' + err.status + '). Try again later. If the problem persists, please email us at support@dataselfie.it.</p>');
                     }
                 });
             })
@@ -736,7 +736,7 @@ var main = {
             }
         });
     },
-    getApiThreshold: function() {
+    getApiThreshold: function(callback) {
         $.ajax({
                 method: "GET",
                 url: apiUrl + "api/threshold",
@@ -744,7 +744,8 @@ var main = {
             .done(function(msg) {
                 apiThreshold = msg;
                 console.log("%cServer call for thresholds.", helper.clog.magenta, apiThreshold);
-            });
+            })
+            .always(callback);
     },
     initDB: function() {
         db = new Dexie("DataSelfieLocalDB");
@@ -776,6 +777,5 @@ var main = {
 }
 
 $(document).ready(function() {
-    main.initDB();
-    main.getApiThreshold();
+    main.getApiThreshold(main.initDB);
 });
