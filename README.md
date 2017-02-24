@@ -3,7 +3,7 @@
 ## how to run
 
 - to make a build (folder) from src ```npm run build```
-- to maka a build and watch for changes ```npm run buildw```
+- to make a build and watch for changes ```npm run buildw```
 - to make a build and minify etc (see webpack.config.js) ```npm run buildprod```
 - in your Chrome browser go to chrome://extensions/ and tick the box that says "Developer mode"
 - now click "Load unpacked extension..." and choose the build folder you just created
@@ -56,4 +56,4 @@
 
 This project is maintained by one developer as of now. Get in touch to be involved at hello@dataselfie.it.
 
-This was mainly tested in Chrome Version 55.0.2883.95 (64-bit) on a Macbook Pro with macOS Sierra 10.12.2 with Facebeook in English (US).
+This was mainly tested in Chrome Version 55.0.2883.95 (64-bit) on a Macbook Pro with macOS Sierra 10.12.2 with Facebook in English (US).
