@@ -1,10 +1,9 @@
 require("../../css/main.scss");
-console.log("Kaboom. Me page loaded.");
 var helper = require("./me_helpers.js"),
     dbstores = require("../dbstores.js"),
     apiThreshold = require("../api-threshold.js"),
     apiUrl = "http://api.dataselfie.it/",
-    // DEV server
+    ////////////////////////////////////////////////////////////// DEV SERVER
     // apiUrl = "http://localhost:3000/",
     db,
     d3 = require("d3"),
@@ -264,10 +263,11 @@ var nlpList = {
     sentList: function(data, name) {
         $("#" + name + "-container .Rtable").html("");
         _.each(_.take(data, 10), function(item) {
-            var sentScore = (item.sentiment.score) ? _.round(item.sentiment.score, 2) : "&#177;0.00";
-            sentScore = (item.sentiment.score > 0) ? "+" + sentScore : sentScore;
+            var sentScore = (item.sentiment) ? _.round(item.sentiment.score, 2) : "&#177;0.00",
+                type = (item.sentiment) ? item.sentiment.type : "";
+            sentScore = (item.sentiment > 0) ? "+" + sentScore : sentScore;
             $("#" + name + "-container .Rtable").append(
-                '<div class="cell looked-text">' + _.round(item.relevance, 2) + '</div><div class="cell">' + sentScore + '</div><div class="cell">' + item.sentiment.type + '</div><div class="cell">' + item.text + '</div>'
+                '<div class="cell looked-text">' + _.round(item.relevance, 2) + '</div><div class="cell">' + sentScore + '</div><div class="cell">' + type + '</div><div class="cell">' + item.text + '</div>'
             );
         });
     },
@@ -465,13 +465,28 @@ var otherPredList = function(preds, interoprets) {
 }
 
 var loadPredictions = function(key) {
+    var noPrediction = function(name) {
+        $("#" + name + "-container .content").append('<p class="error">No analysis could be made.</p>');
+    }
     chrome.storage.local.get(null, function(res) {
         if (res.alchemy && key == "alchemy") {
             body.find(".alchemy-last span").text(moment(res.alchemy.lastUpdated).format("MMM-DD-YY"));
             console.log("%cAlchemy Language processing", helper.clog.green, res.alchemy);
-            nlpList.list(res.alchemy.predData.concepts, "concepts");
-            nlpList.sentList(res.alchemy.predData.entities, "entities");
-            nlpList.sentList(res.alchemy.predData.keywords, "keywords");
+            if (res.alchemy.predData.concepts.length > 0) {
+                nlpList.list(res.alchemy.predData.concepts, "concepts");
+            } else {
+                noPrediction("concepts");
+            };
+            if (res.alchemy.predData.entities.length > 0) {
+                nlpList.sentList(res.alchemy.predData.entities, "entities");
+            } else {
+                noPrediction("entities");
+            }
+            if (res.alchemy.predData.keywords.length > 0) {
+                nlpList.sentList(res.alchemy.predData.keywords, "keywords");
+            } else {
+                noPrediction("keywords");
+            }
         }
 
         if (res.personality && key == "personality") {
@@ -505,8 +520,8 @@ var loadPredictions = function(key) {
 
         if (key == "reveal") {
             $("#loading").delay(2000).hide(function() {
+                // at least have some looked content enough to make an ams prediction
                 if (res.applymagicsauce) {
-                    // at least have some looked content enough to make an ams prediction
                     // FIX delay and fade in
                     $("#usage-message").delay(200).hide();
                     $("#the-good-stuff").delay(200).css('position', 'relative').animate({ opacity: 1 }, 200);
@@ -533,7 +548,7 @@ var apis = {
             if (this.apiErrors == 3) {
                 $("#usage-message").html('<span class="warning">attention:</span> Server error, please refresh page.')
             } else {
-                $("#usage-message").html('<span class="warning">attention:</span> Not enough data yet. There is not enough consumption. You should scroll through your feed more, consider typing more (e.g. commenting or private messages), so Data Selfie can predict your personality and shopping preferences a.o. The more time you spend on Facebook the faster you will get your predictions.');
+                $("#usage-message").html('<span class="warning">attention:</span> Not enough data yet. There is not enough consumption. You need to scroll through your feed, consider typing more (e.g. commenting or private messages), so Data Selfie can make predictions. The more time you spend on Facebook the faster you will get your predictions.');
             }
         }
         var values = _.values(this.fired);
@@ -584,10 +599,28 @@ var apis = {
                         break;
                 }
             })
-            .fail(function(err) {
+            .fail(function(jqXHR, textStatus, errorThrown) {
                 chrome.storage.local.get(endpoint, function(res) {
-                    if (!res[endpoint]) {
-                        body.find("." + endpoint + "-content").append('<p class="error">Sorry, there has been a problem with retrieving this analysis (Status ' + err.status + '). Try again later. If the problem persists, please email us at support@dataselfie.it.</p>');
+                    if (res[endpoint] == undefined) {
+                        var predContainer = body.find("." + endpoint + "-content"),
+                            statusInfo = (jqXHR.responseJSON) ? ": " + jqXHR.responseJSON.statusInfo : "",
+                            language = (jqXHR.responseJSON) ? " " + jqXHR.responseJSON.language : "",
+                            html = '<p class="error">Sorry, there has been an error ';
+                        if (jqXHR.status == 413) {
+                            statusInfo = ": Data too large. Please contact us at support@dataselfie.it";
+                        }
+                        switch (endpoint) {
+                            case "alchemy":
+                                html += '(' + jqXHR.status + helper.replaceAll(statusInfo, "-", " ") + language + ').';
+                                break;
+                            case "personality":
+                                html += '(' + jqXHR.status + helper.replaceAll(statusInfo, "-", " ") + ').';
+                                break;
+                            case "applymagicsauce":
+                                html += '(' + jqXHR.status + helper.replaceAll(statusInfo, "-", " ") + ').';
+                                break;
+                        };
+                        predContainer.append(html + '</p>');
                     }
                 });
             })
@@ -604,9 +637,9 @@ var apis = {
             var last = (!res[key]) ? moment() : moment(res[key].lastUpdated);
             var now = moment();
             var diffLength = (!res[key]) ? newlength : newlength - res[key].dataLength;
-            // if data older than 5 days, difference from prev data at least half of threshold, applymagicsauce likes more than 10
-            // OR if difference from prev data at least threshold, applymagicsauce likes more than 10
-            if ((now.diff(last, "days") > 5 && diffLength != 0 && newlength > 10) || (diffLength >= threshold && newlength > 10)) {
+            // if data older than 5 days, difference from prev data not 0, applymagicsauce likes more than 15
+            // OR if difference from prev data at least threshold, applymagicsauce likes more than 15
+            if ((now.diff(last, "days") > 5 && diffLength != 0 && newlength > 15) || (diffLength >= threshold && newlength > 15)) {
                 console.log("Yes API call. Enough new content or enough time passed since last call.", key, diffLength, ">", threshold);
                 callback();
             } else {
@@ -617,39 +650,82 @@ var apis = {
         });
     },
     truncate: function(str, max) {
-        var strArr = str.split(" $+-+$ ");
-        // take the last posts according to value of max
-        return strArr.slice(strArr.length - 1 - max, strArr.length - 1).join(" ");
+        var strArr = str.split(" $+-+$ "),
+            trunced = "";
+        if (strArr.length > max) {
+            // take the last posts according to value of max
+            trunced = strArr.slice(strArr.length - 1 - max, strArr.length - 1).join(" ");
+        } else {
+            trunced = strArr.join(" ");
+        }
+        return trunced;
     },
     prepareAlchemyCall: function() {
         var self = this,
-            desc = "";
+            desc = "",
+            arrLength,
+            truncDesc,
+            origLen,
+            cleanDesc,
+            truncSize;
         db.looked.toArray(function(arr) {
-            for (var i = 0; i < arr.length; i++) {
+            arrLength = arr.length;
+            for (var i = 0; i < arrLength; i++) {
                 desc += _.join(arr[i].postDesc, " ") + " " + _.join(arr[i].origDesc, " ") + " $+-+$ ";
             }
         }).then(function() {
-            var truncDesc = self.truncate(desc, apiThreshold.alchemyMax),
-                origLen = desc.split(" ").length,
-                cleanDesc = helper.replaceAll(desc, " $+-+$ ", " ");
-            console.log("%clooked descriptions", helper.clog.green, cleanDesc, origLen, "(total) - sent:", truncDesc.split(" ").length);
+            cleanDesc = helper.replaceAll(desc, " $+-+$ ", " ");
+            origLen = cleanDesc.split(" ").length;
+            var lessText = function() {
+                truncDesc = self.truncate(desc, arrLength);
+                truncSize = helper.getByteSize(truncDesc);
+                if (truncSize > 80000) {
+                    arrLength -= 10;
+                    lessText();
+                } else {
+                    return;
+                }
+            };
+            lessText();
+        }).finally(function() {
+            console.log("%clooked descriptions", helper.clog.green, truncSize, "bytes,", truncDesc.split(" ").length, "words sent of total", origLen, "words\n", cleanDesc);
             // sending over the original length
             // but make prediction based on truncated/most recent data
             self.newCall("alchemy", origLen, function() {
                 self.fired.alchemy = 1;
                 self.postReq("alchemy", { "desc": truncDesc, "length": origLen });
             });
+
         });
     },
     preparePersonalityCall: function() {
-        var self = this;
+        var self = this,
+            arrLength,
+            truncTyped,
+            origLen,
+            cleanTyped,
+            truncSize;
         db.typed.toArray(function(arr) {
+            arrLength = arr.length;
             return _(arr).map("content").join(" $+-+$ ");
         }).then(function(typed) {
-            var truncTyped = self.truncate(typed, apiThreshold.personalityMax),
-                origLen = typed.split(" ").length,
-                cleanTyped = helper.replaceAll(typed, " $+-+$ ", " ");
-            console.log("%ctyped content", helper.clog.yellow, cleanTyped, origLen, "(total) - sent:", truncTyped.split(" ").length);
+            cleanTyped = helper.replaceAll(typed, " $+-+$ ", " ");
+            origLen = cleanTyped.split(" ").length;
+            console.log(self.truncate(typed, arrLength));
+            var lessText = function() {
+                truncTyped = self.truncate(typed, arrLength);
+                truncSize = helper.getByteSize(truncTyped);
+                // console.log(typed, truncTyped, truncSize, arrLength);
+                if (truncSize > 80000) {
+                    arrLength -= 10;
+                    lessText();
+                } else {
+                    return;
+                }
+            };
+            lessText();
+        }).finally(function() {
+            console.log("%ctyped content", helper.clog.yellow, truncSize, "bytes,", truncTyped.split(" ").length, "words sent of total", origLen, "words\n", cleanTyped);
             self.newCall("personality", origLen, function() {
                 self.fired.personality = 1;
                 self.postReq("personality", { "typed": truncTyped, "length": origLen });
@@ -668,6 +744,14 @@ var apis = {
                 self.fired.applymagicsauce = 1;
                 self.postReq("applymagicsauce", { "likeids": likeids });
             });
+        });
+    },
+    checkApplyMagicSaucePred: function() {
+        chrome.storage.local.get("applymagicsauce", function(res) {
+            if (res.applymagicsauce != undefined && res.applymagicsauce.predData.predictions == undefined) {
+                console.log("applymagicsauce does not contain predictions, delete from local.storage");
+                chrome.storage.local.remove(["applymagicsauce"]);
+            }
         });
     }
 }
@@ -696,7 +780,7 @@ var main = {
                 }
             }
         });
-        chrome.storage.local.get(null, function(res) {
+        chrome.storage.local.get("dsUser", function(res) {
             if (res.dsUser) {
                 $("#status img").attr("src", res.dsUser.profilePic.dataUri);
                 $("#user a").attr("href", res.dsUser.profileLink).text(res.dsUser.userName);
@@ -764,7 +848,10 @@ var main = {
                     topList.list("user");
                     topList.list("page");
                     topList.likes();
+                    // previously with status 204, empty data in local storage
+                    apis.checkApplyMagicSaucePred();
                     // prepare data and check, if a call needs to be made
+                    // FIX double console.log when new prediction for all 3
                     apis.prepareAlchemyCall();
                     apis.preparePersonalityCall();
                     apis.prepareApplyMagicSauceCall();
@@ -778,4 +865,7 @@ var main = {
 
 $(document).ready(function() {
     main.getApiThreshold(main.initDB);
+    console.log("Kaboom. Me page loaded.");
+    console.log("%cLegend: all related to looked", helper.clog.green);
+    console.log("%cLegend: all related to typed", helper.clog.yellow);
 });

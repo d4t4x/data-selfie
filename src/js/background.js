@@ -15,11 +15,35 @@ var greeting = "\n" +
 
 function generalListeners() {
     chrome.runtime.onUpdateAvailable.addListener(function(details) {
-        alert('There is a new version (' + 1 + ') of Data Selfie available.\n\nIt will be updated soon or you can manually update it yourself by going to chrome://extensions. At the top right, check "Developer Mode". Click "Update extensions now" under "Developer mode".');
+        chrome.browserAction.setBadgeText({ text: "!" });
         chrome.runtime.reload();
     });
-    chrome.runtime.onInstalled.addListener(function() {
-        console.log("onInstalled");
+    chrome.runtime.onInstalled.addListener(function(details) {
+        console.log("onInstalled", details.reason);
+        if (details.reason == "update") {
+            var desc = "";
+            db.looked.toArray(function(arr) {
+                for (var i = 0; i < arr.length; i++) {
+                    desc += _.join(arr[i].postDesc, " ") + " " + _.join(arr[i].origDesc, " ") + " ";
+                }
+            }).then(function() {
+                var origLen = desc.split(" ").length;
+                chrome.storage.local.get("alchemy", function(res) {
+                    res.alchemy.dataLength = origLen;
+                    chrome.storage.local.set(res);
+                });
+            });
+
+            db.typed.toArray(function(arr) {
+                return _(arr).map("content").join(" ");
+            }).then(function(typed) {
+                var origLen = typed.split(" ").length;
+                chrome.storage.local.get("personality", function(res) {
+                    res.personality.dataLength = origLen;
+                    chrome.storage.local.set(res);
+                });
+            });
+        }
         // FIX with proper escaping
         // db.pages.each(function(row) {
         //     var escapedUrl = helper.escapeString(row.url);

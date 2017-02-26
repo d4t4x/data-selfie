@@ -5,23 +5,52 @@
     <meta charset="UTF-8">
     <title>Data Selfie _ Options</title>
     <style>
-        button, button:focus {
-            width: 200px;
-            background-color: #FFF;
-            border: 1px solid #000;
-            padding: 10px 0;
-            margin: 2px 0;
-            outline:0;
-        }
-        button:hover {
-            background-color: #000;
-            color: #FFF;
-            cursor: pointer;
-        }
+    button,
+    button:focus {
+        width: 200px;
+        background-color: #FFF;
+        border: 1px solid #000;
+        padding: 10px 0;
+        margin: 2px 0;
+        outline: 0;
+    }
+
+    button:hover {
+        background-color: #000;
+        color: #FFF;
+        cursor: pointer;
+    }
+
+    p {
+        line-height: 1.4;
+    }
+
+    a {
+        outline: 0;
+        color: #000;
+    }
+
+    #update {
+        display: none;
+    }
+
+    #update span {
+        color: #FFF;
+        color: lime;
+        background-color: #000;
+    }
     </style>
 </head>
 
 <body>
+    <div id="update">
+        <p><span>There is a new update available.
+        <br>It will be updated soon!</span>
+            <br>You can manually update it yourself by going to <a href="chrome://extensions" id="extensionslink">chrome://extensions</a>.
+            <br>At the top right, check <i>"Developer Mode"</i>. Right below, click <i>"Update extensions now"</i>.
+        </p>
+        <hr>
+    </div>
     <p id="status">Collect and analyze data from your interactions on facebook.com.</p>
     <button id="me" inactive>Your Data Selfie</button>
     <button id="backup">Export Your Data</button>

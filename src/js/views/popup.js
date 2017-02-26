@@ -1,5 +1,15 @@
+chrome.browserAction.getBadgeText({}, function(text){
+    if(text.length > 0) {
+        $("#update").show();
+        chrome.browserAction.setBadgeText({ text: "" });
+    }
+});
+
 $(document).click(function(e) {
     switch (e.target.id) {
+        case "extensionslink":
+            chrome.tabs.create({ url: "chrome://extensions" });
+            break;
         case "me":
             chrome.tabs.create({ url: chrome.runtime.getURL("views/me.html") });
             break;

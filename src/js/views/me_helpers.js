@@ -36,5 +36,9 @@ module.exports = {
                 console.log("%c[DB][<<]" + rows, clog.magenta);
                 return rows;
             });
+    },
+    getByteSize: function(str) {
+        // http://stackoverflow.com/a/34332105
+        return (new TextEncoder('utf-8').encode(str)).length;
     }
 }
