@@ -422,6 +422,7 @@ var politicsList = function(pols) {
     _.each(_.orderBy(pols, "trait"), function(item) {
         var val = _.round(item.value * 100, 0);
         var label = _.replace(item.trait, "Politics_", "");
+        label = label === "Libertanian" ? "Libertarian" : label;
         $("#politics-chart").append(
             '<li class="bar-4"><div><div style="height: ' + val + '%"></div></div><p><span class="looked-text">' + val + ' %</span><br>' + label + '</p></li>'
         );
