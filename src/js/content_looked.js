@@ -222,7 +222,20 @@ module.exports = {
         }, 500);
     },
     updateNewsFeed: function() {
-        window.global.feed = $("#stream_pagelet");
+      var datasource = {};
+      var streamPagelet = $("#stream_pagelet");
+      var groupStreamPagelet = $("#pagelet_group_");
+      var pageStreamPagelet = $("#pagelet_timeline_main_column");
+      if(streamPagelet.length>0) {
+        datasource = streamPagelet;
+      }
+      if(groupStreamPagelet.length>0) {
+        datasource = groupStreamPagelet;
+      }
+      if(pageStreamPagelet.length>0) {
+        datasource = pageStreamPagelet;
+      }
+      window.global.feed = datasource; 
     },
     init: function() {
         this.updateNewsFeed();
