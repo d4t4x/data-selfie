@@ -1,5 +1,6 @@
 require('expose-loader?global!./content_global.js');
 var helper = require("./content_helpers.js"),
+    newsfeedEl = "",
     logic = {
         loggedId: "", // previously saved infocus element id
         getEmptyObj: function() {
@@ -122,11 +123,11 @@ var helper = require("./content_helpers.js"),
             this.updateClockSec("");
         },
         updateClockSec: function(_sec) {
-            window.global.secEl.text(_sec);
+            $("#clocksec").text(_sec);
             if (window.global.windowFocused) {
-                window.global.clock.fadeIn();
+                $("#clock").fadeIn();
             } else {
-                window.global.clock.fadeOut();
+                $("#clock").fadeOut();
             }
         },
         lookedFocusedFalse: function() {
@@ -180,7 +181,7 @@ module.exports = {
         };
     },
     getPagePosts: function() {
-        var posts = window.global.feed.find("div._4-u2.mbm._5v3q._4-u8").children($("div._3ccb._4-u8"));
+        var posts = newsfeedEl.find("div._4-u2.mbm._5v3q._4-u8").children($("div._3ccb._4-u8"));
         // console.log(posts);
         return posts;
     },
@@ -222,7 +223,7 @@ module.exports = {
         }, 500);
     },
     updateNewsFeed: function() {
-        window.global.feed = $("#stream_pagelet");
+        newsfeedEl = $("#stream_pagelet");
     },
     init: function() {
         this.updateNewsFeed();

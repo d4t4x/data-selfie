@@ -4,16 +4,14 @@ var helper = require("./content_helpers.js"),
     looked = require("./content_looked.js"),
     typed = require("./content_typed.js"),
     throttle = require('throttle-debounce/throttle'),
-    init = {
+    kickoff = {
         addClock: function() {
             $("body").append('<div id="clock"><span id="clocksec">' + 0 + '</span></div>');
-            window.global.clock = $("#clock");
-            window.global.secEl = $("#clocksec");
         },
-        saveProfilePic: function() {
-            var profileLink = window.global.profileInfo[0].href;
-            var profilePic = window.global.profileInfo.children("img")[0].src;
-            var userName = window.global.profileInfo.text();
+        saveProfilePic: function(info) {
+            var profileLink = info[0].href;
+            var profilePic = info.find("img")[0].src;
+            var userName = info[0].text;
             helper.convertImg(profilePic, function(dataUri, rawImg) {
                 helper.sendToBg("profilePic", [dataUri, rawImg, profileLink, userName]);
             });
@@ -78,7 +76,7 @@ var helper = require("./content_helpers.js"),
                         postsNum = looked.getPagePosts().length;
                     // url is undefined if it's in overlay
                     // postsNum, so only for newsfeed
-                    if (el.attr("data-testid") == "fb-ufi-likelink" && url != undefined &&  postsNum > 0 ) {
+                    if (el.attr("data-testid") == "fb-ufi-likelink" && url != undefined && postsNum > 0) {
                         console.log("clicked " + url);
                         helper.sendToBg("saveClicked", {
                             type: "like",
@@ -115,25 +113,27 @@ var helper = require("./content_helpers.js"),
         }
     };
 
-window.onload = function() {
-    console.log("\n\n\n\n\nKabooom. Content script loaded.");
+var start = function() {
+    console.log("\n\n\n\n\nYay! Content page document.readyState: ", document.readyState);
     looked.getMinLookedDuration();
     // this class can change anytime
     // and could easily be the reason why tracking will stop working
-    window.global.profileInfo = $("#pagelet_bluebar a._2s25._606w");
-    if (window.global.profileInfo.length > 0) {
+    var info = $("#pagelet_bluebar a._2s25").has("img");
+    if (info.length > 0) {
         // this is the beginning, bg only starts tracking
         // if profle img / logged in
         helper.sendToBg("contentLoaded", [1]); // session true
         console.log("Tracking on this page.");
-        init.listeners();
-        init.addClock();
-        init.saveProfilePic();
+        kickoff.listeners();
+        kickoff.addClock();
+        kickoff.saveProfilePic(info);
         looked.init();
-        clicked.init();
-        typed.init();
+        // clicked.init();
+        // typed.init();
     } else {
         helper.sendToBg("contentLoaded", [0]); // session false
-        console.log("No tracking on this page.");
+        console.log("Boo! No tracking on this page. Check https://github.com/d4t4x/data-selfie/issues");
     };
-};
+}
+
+start();

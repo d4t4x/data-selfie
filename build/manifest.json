@@ -1,6 +1,6 @@
 {
     "name": "Data Selfie",
-    "version": "0.0.13",
+    "version": "0.0.14",
     "description": "Collect and analyze data from your interactions on facebook.com.",
     "background": {
         "scripts": ["js/background.js"],
@@ -26,7 +26,8 @@
     "content_scripts": [{
         "matches": ["https://www.facebook.com/*", "http://www.facebook.com/*"],
         "js": ["js/content.js"],
-        "css": ["css/fblayer.css"]
+        "css": ["css/fblayer.css"],
+        "run_at": "document_idle"
     }],
     "homepage_url": "http://dataselfie.it",
     "manifest_version": 2,
