@@ -128,8 +128,8 @@ var start = function() {
         kickoff.addClock();
         kickoff.saveProfilePic(info);
         looked.init();
-        // clicked.init();
-        // typed.init();
+        clicked.init();
+        typed.init();
     } else {
         helper.sendToBg("contentLoaded", [0]); // session false
         console.log("Boo! No tracking on this page. Check https://github.com/d4t4x/data-selfie/issues");
