@@ -1,4 +1,3 @@
-require('expose-loader?global!./content_global.js');
 var helper = require("./content_helpers.js"),
     looked = require("./content_looked.js"),
     inputWords = "",
@@ -28,25 +27,25 @@ module.exports = {
     init: function() {
         var self = this;
         $("body").on('keyup', function(e) {
-            if (window.global.lookedFocused == true) {
+            if (window.lookedFocused == true) {
                 // when typing != focused on posts
-                window.global.lookedFocused = false;
+                window.lookedFocused = false;
             }
             if (e.keyCode != 13) {
                 inputWords = self.getInputValue(e.target);
             }
             // console.log("input: " + inputWords + "\n prev: " + prevInputWords);
             if (e.target.contentEditable == "true" || e.target.localName.toLowerCase() == "textarea") {
-                if (e.keyCode === 8) {
-                    thought++;
-                    if (thought == 5 || inputWords.length == 0 && prevInputWords.length > 8) {
-                        // when pressed delete x times
+                if (e.keyCode === 8) { // delete
+                    thought--; // next thought
+                    if (thought === -5 || inputWords.length === 0 && prevInputWords.length > 8) {
+                        // when pressed delete x times (x thoughts)
                         // or when deleted everything all at once
                         self.saveWords(e.target, prevInputWords);
                     }
-                } else if (e.keyCode === 13) {
-                    thought++;
-                    if (thought == 1) { // when press enter once
+                } else if (e.keyCode === 13) { // enter
+                    thought++; // next thought
+                    if (thought === 1) { // when press enter once
                         self.saveWords(e.target, prevInputWords);
                     }
                 } else {
@@ -55,11 +54,12 @@ module.exports = {
                 }
             };
             e.target.addEventListener("blur", function() {
-                window.global.lookedFocused == true;
-                looked.postsInView();
                 thought++;
-                if (thought == 1) {
+                if (thought === 1) {
+                    console.log("left text field");
+                    window.lookedFocused = true;
                     self.saveWords(e.target, prevInputWords);
+                    // looked.postsInView();
                 }
             });
         });

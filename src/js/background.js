@@ -85,9 +85,11 @@ function generalListeners() {
                 });
                 break;
             case "backup":
-                helper.backup(db);
+                console.log("test just callback")
+                // helper.backup(db);
                 break;
             case "import":
+                console.log("import data");
                 if (req.data.dataselfie != undefined) {
                     helper.import(db, req.data.dataselfie);
                 } else {

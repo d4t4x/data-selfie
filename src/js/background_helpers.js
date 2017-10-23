@@ -52,6 +52,8 @@ module.exports = {
             })
         }).then(function() {
             self.saveBackup(obj);
+        }).catch(function(err) {
+            console.error(err.stack);
         });
     },
     importError: function() {
@@ -101,7 +103,7 @@ module.exports = {
                     chrome.storage.local.get(null, function(res) {
                         if (res.closeWindow != undefined) {
                             _table.update(last.id, { stop: res.closeWindow.timestamp });
-                            chrome.storage.remove("closeWindow");
+                            chrome.storage.local.remove("closeWindow");
                             console.log("%c[DB][<<] updated stop of last session " + res.closeWindow.timestamp, clog.magenta);
                         } else {
                             // if for some reason, so the last session will be eliminated

@@ -1,5 +1,10 @@
 require('./libs/jquery.scrollstop.min.js');
-require('expose-loader?global!./content_global.js');
+window.sec = 0;
+window.lookedFocused = false;
+window.windowFocused = true;
+window.overlayFocused = false;
+window.minLookedDuration = 3;
+window.loc = window.location.href;
 var helper = require("./content_helpers.js"),
     looked = require("./content_looked.js"),
     typed = require("./content_typed.js"),
@@ -19,24 +24,24 @@ var helper = require("./content_helpers.js"),
         listeners: function() {
             var _window = $(window);
             window.onblur = function() {
-                window.global.windowFocused = false;
+                window.windowFocused = false; // replaced window.global
                 looked.logic.lookedFocusedFalse();
-                looked.logic.logLooked(looked.logic.cachedObj, window.global.sec);
+                looked.logic.logLooked(looked.logic.cachedObj, window.sec); // replaced window.global
                 helper.sendToBg("blur", []);
             };
             window.onbeforeunload = function() {
                 helper.sendToBg("closeWindow", []);
-                if (window.global.windowFocused == true) {
+                if (window.windowFocused == true) { // replaced window.global
                     chrome.storage.local.set({
                         "closeWindow": {
                             "timestamp": helper.now()
                         }
                     });
-                    looked.logic.logLooked(looked.logic.cachedObj, window.global.sec);
+                    looked.logic.logLooked(looked.logic.cachedObj, window.sec); // replaced window.global
                 }
             };
             window.onfocus = function() {
-                window.global.windowFocused = true;
+                window.windowFocused = true; // replaced window.global
                 looked.checkPhotoOverlay(200, function() {
                     looked.postsInView();
                 });
@@ -44,7 +49,7 @@ var helper = require("./content_helpers.js"),
             };
             $.event.special.scrollstop.latency = 800;
             _window.on("scrollstop", throttle(2000, function() {
-                if (window.global.windowFocused) {
+                if (window.windowFocused) { // replaced window.global
                     console.log("scrollstop check posts");
                     looked.postsInView();
                 }
@@ -55,7 +60,7 @@ var helper = require("./content_helpers.js"),
                     dif = Math.abs(curPos - prevScrollPos);
                 if (dif > 800) {
                     // scrolling a lot = stopped looking at the current post
-                    looked.logic.logLooked(looked.logic.cachedObj, window.global.sec);
+                    looked.logic.logLooked(looked.logic.cachedObj, window.sec); // replaced window.global
                 }
                 prevScrollPos = curPos;
             }));
@@ -101,7 +106,7 @@ var helper = require("./content_helpers.js"),
                     var fbSearchbar = bluebar.find("input[aria-expanded=true]");
                     if (fbSearchbar.length > 0 || e.target.className.indexOf("f_click") > -1) {
                         looked.logic.lookedFocusedFalse();
-                        looked.logic.logLooked(looked.logic.cachedObj, window.global.sec);
+                        looked.logic.logLooked(looked.logic.cachedObj, window.sec); // replaced window.global
                     };
                     looked.checkLocChanged();
                 } else {
@@ -132,7 +137,7 @@ var start = function() {
         typed.init();
     } else {
         helper.sendToBg("contentLoaded", [0]); // session false
-        console.log("Boo! No tracking on this page. Check https://github.com/d4t4x/data-selfie/issues");
+        console.log("Boo! No tracking on this page. Only activity in your newsfeed are tracked. Check https://github.com/d4t4x/data-selfie/issues");
     };
 }
 

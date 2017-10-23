@@ -1,4 +1,3 @@
-require('expose-loader?global!./content_global.js');
 var helper = require("./content_helpers.js"),
     newsfeedEl = "",
     logic = {
@@ -94,44 +93,44 @@ var helper = require("./content_helpers.js"),
             this.cachedObj = postData;
         },
         logLooked: function(_obj, _sec, callback) {
-            if (_sec >= window.global.minLookedDuration && _obj.postActivity.length > 0) {
+            if (_sec >= window.minLookedDuration && _obj.postActivity.length > 0) {
                 // if this fails, obj will not be saved in DB
                 // logic.cachedObj is still unchanged
                 _obj.duration = _sec;
                 _obj.timestamp = moment(helper.now()).subtract(_sec, 'seconds').format();
                 helper.sendToBg("saveLooked", _obj);
-                console.log("looked", _sec + " >= " + window.global.minLookedDuration, _obj.postActivity);
+                console.log("looked", _sec + " >= " + window.minLookedDuration, _obj.postActivity);
             };
             this.resetClock();
             if (callback) { callback(); }
         },
         startTimer: function() {
             var self = this;
-            window.global.timer = setInterval(function() {
-                if (window.global.lookedFocused &&
-                    window.global.windowFocused &&
-                    !window.global.overlayFocused) {
-                    window.global.sec += 1;
-                    self.updateClockSec(window.global.sec);
+            window.timer = setInterval(function() {
+                if (window.lookedFocused &&
+                    window.windowFocused &&
+                    !window.overlayFocused) {
+                    window.sec += 1;
+                    self.updateClockSec(window.sec);
                 } else {
                     self.updateClockSec("");
                 }
             }, 1000);
         },
         resetClock: function() {
-            window.global.sec = 0;
+            window.sec = 0;
             this.updateClockSec("");
         },
         updateClockSec: function(_sec) {
             $("#clocksec").text(_sec);
-            if (window.global.windowFocused) {
+            if (window.windowFocused) {
                 $("#clock").fadeIn();
             } else {
                 $("#clock").fadeOut();
             }
         },
         lookedFocusedFalse: function() {
-            window.global.lookedFocused = false;
+            window.lookedFocused = false;
             $("#"+this.loggedId).removeClass("highlighted");
         },
         cachedObj: {},
@@ -141,7 +140,7 @@ module.exports = {
     logic: logic, // separated from exports because of scoping problem
     getMinLookedDuration: function() {
         chrome.storage.local.get(null, function(res) {
-            window.global.minLookedDuration = res.optionsMinLookedDuration;
+            window.minLookedDuration = res.optionsMinLookedDuration;
         });
     },
     isInView: function(rect) {
@@ -154,7 +153,7 @@ module.exports = {
         for (var i = posts.length - 1; i >= 0; i--) {
             var rect = posts[i].getBoundingClientRect();
             if (this.isInView(rect) && $(posts[i]).find("h5").length > 0) {
-                window.global.lookedFocused = true;
+                window.lookedFocused = true;
                 console.log("looked forloop found post");
 
                 infocusId = posts[i].id;
@@ -165,7 +164,7 @@ module.exports = {
                 // if the current infocus != the logged (one from saved before), i.e. if there is a new element in focus and if loggedId is not empty ()
                 if (logic.loggedId != infocusId && logic.loggedId != "") {
                     // wrapup previous and init new logged element
-                    logic.logLooked(logic.cachedObj, window.global.sec, function() {
+                    logic.logLooked(logic.cachedObj, window.sec, function() {
                         logic.updateCacheObj(infocusId);
                     });
                     // log infocus element in loggedId to compare next infocus to
@@ -190,7 +189,7 @@ module.exports = {
         if (posts.length == 0) {
             console.log("no newsfeed posts in view");
             logic.lookedFocusedFalse();
-        } else if (window.global.overlayFocused == false) {
+        } else if (window.overlayFocused == false) {
             console.log("yes newsfeed posts + no overlay");
             this.highlightPost(posts);
         }
@@ -201,24 +200,24 @@ module.exports = {
             var photoOverlay = $("#photos_snowlift").css('z-index');
             if (photoOverlay == 'auto' || photoOverlay == undefined) {
                 // there is no overlay, so fire that callback
-                window.global.overlayFocused = false;
-                console.log("no overlay", window.global.overlayFocused);
+                window.overlayFocused = false;
+                console.log("no overlay", window.overlayFocused);
                 if (callback) { callback(); }
             } else {
                 // there is an overlay active
-                logic.logLooked(logic.cachedObj, window.global.sec);
-                window.global.overlayFocused = true;
-                console.log("yes overlay", window.global.overlayFocused);
-                window.global.lookedFocused == false;
+                logic.logLooked(logic.cachedObj, window.sec);
+                window.overlayFocused = true;
+                console.log("yes overlay", window.overlayFocused);
+                window.lookedFocused == false;
             }
         }, delay);
     },
     checkLocChanged: function() {
         setTimeout(function() {
-            if (window.global.loc != window.location.href) {
-                console.log("location change", window.global.loc, window.location.href)
-                logic.logLooked(logic.cachedObj, window.global.sec);
-                window.global.loc = window.location.href;
+            if (window.loc != window.location.href) {
+                console.log("location change", window.loc, window.location.href)
+                logic.logLooked(logic.cachedObj, window.sec);
+                window.loc = window.location.href;
             };
         }, 500);
     },

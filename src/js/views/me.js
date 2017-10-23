@@ -522,7 +522,7 @@ var loadPredictions = function(key) {
         if (key == "reveal") {
             $("#loading").delay(2000).hide(function() {
                 // at least have some looked content enough to make an ams prediction
-                if (res.applymagicsauce) {
+                if (res.applymagicsauce || res.personality || res.alchemy) {
                     // FIX delay and fade in
                     $("#usage-message").delay(200).hide();
                     $("#the-good-stuff").delay(200).css('position', 'relative').animate({ opacity: 1 }, 200);
@@ -543,14 +543,16 @@ var apis = {
     },
     apiErrors: 0,
     apiDone: false,
+    msgContainer: $("#usage-message"),
     checkApisDone: function(msg) {
-        if (msg == "error") {
+        if (msg === "error") {
             this.apiErrors++;
             if (this.apiErrors == 3) {
-                $("#usage-message").html('<span class="warning">attention:</span> Server error, please refresh page.')
-            } else {
-                $("#usage-message").html('<span class="warning">attention:</span> Not enough data yet. There is not enough consumption. You need to scroll through your feed, consider typing more (e.g. commenting or private messages), so Data Selfie can make predictions. The more time you spend on Facebook the faster you will get your predictions.');
+                // if all APIs have error
+                this.msgContainer.html('<span class="warning">attention:</span> Server error, please refresh page.');
             }
+        } else if (msg === "notenough") {
+            this.msgContainer.html('<span class="warning">attention:</span> Not enough data yet. There is not enough consumption. You need to scroll through your feed, consider typing more (e.g. commenting or private messages), so Data Selfie can make predictions. The more time you spend on Facebook the faster you will get your predictions.');
         }
         var values = _.values(this.fired);
         console.log("APIs in progress", values, _.uniq(values));
@@ -608,7 +610,7 @@ var apis = {
                             language = (jqXHR.responseJSON) ? " " + jqXHR.responseJSON.language : "",
                             html = '<p class="error">Sorry, there has been an error ';
                         if (jqXHR.status == 413) {
-                            statusInfo = ": Data too large. Please contact us at support@dataselfie.it";
+                            statusInfo = ": Data too large. Please email support@dataselfie.it";
                         }
                         switch (endpoint) {
                             case "alchemy":
@@ -624,10 +626,10 @@ var apis = {
                         predContainer.append(html + '</p>');
                     }
                 });
+                self.checkApisDone("error");
             })
             .always(function(jqXHR, textStatus) {
                 self.fired[endpoint] = 2;
-                self.checkApisDone("error");
                 console.log("API status", endpoint, jqXHR.status, textStatus);
             });
     },
@@ -646,7 +648,7 @@ var apis = {
             } else {
                 console.log("No API call. Not enough new content.", key, diffLength, "<", threshold);
                 self.fired[key] = 2;
-                self.checkApisDone();
+                self.checkApisDone("notenough");
             }
         });
     },

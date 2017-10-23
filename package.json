@@ -15,7 +15,6 @@
     "clean-webpack-plugin": "^0.1.14",
     "copy-webpack-plugin": "^4.0.0",
     "dexie": "^1.5.1",
-    "expose-loader": "^0.7.1",
     "jquery": "^3.1.1",
     "lodash": "^4.16.6",
     "d3": "^4.5.0",

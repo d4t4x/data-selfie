@@ -65,6 +65,7 @@ p {
 #main {
     width: 100%;
     margin: 20px auto;
+    overflow: hidden;
 }
 
 footer {
@@ -92,22 +93,32 @@ footer {
     }
 }
 
+.tool-tip:hover {
+    cursor: pointer;
+}
+
 .tool-tip::before {
     content: attr(data-tooltip);
     background-color: rgba(80, 80, 80, 0.9);
     color: $w;
-    width: 180px;
+    width: 100%;
+    height: 100%;
     position: absolute;
     z-index: 1000;
     padding: 5px;
-    left: 0px;
-    top: 15px;
+    left: 0;
+    top: -5px;
     opacity: 0;
+    overflow: hidden;
     font-size: 11px;
 }
 
 .tool-tip:hover::before {
     opacity: 1;
+    top: 15px;
+    overflow: visible;
+    width: 180px;
+    height: auto;
 }
 
 #legend div {
@@ -219,25 +230,37 @@ footer {
             padding: 0 4px;
             top: -8px;
             right: 5px;
+            &:hover {
+                cursor: pointer;
+            }
         }
         .tech-label::before {
             content: attr(data-tooltip);
             background-color: rgba(80, 80, 80, 0.9);
             color: $w;
-            width: 120px;
+            width: 100%;
+            height: 100%;
             position: absolute;
-            padding: 5px;
-            left: -120px;
-            top: 15px;
+            padding: 2px;
+            left: -5px;
+            top: -5px;
             opacity: 0;
             font-size: 11px;
+            overflow: hidden;
         }
         .tech-label:hover::before {
             opacity: 1;
+            padding: 5px 8px;
+            overflow: visible;
+            width: 120px;
+            left: -110px;
+            top: 15px;
+            height: auto;
         }
         .content {
             padding: $baseU + px;
             line-height: 1.3em;
+            overflow: scroll;
             p {
                 margin: 0 0 1em 0;
                 color: $w2;
