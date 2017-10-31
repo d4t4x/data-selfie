@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Data Selfie _ Manage Data</title>
+    <style>
+    body {
+        background-color: #000;
+        color: #FFF;
+        font-family: "Menlo", monospace;
+        line-height: 1.2;
+        font-size: 0.8em;
+    }
+
+    #data {
+        width: calc(100% - 40px);
+        padding: 20px;
+        height: 350px;
+        border: 1px solid #FFF;
+        overflow-y: scroll;
+        overflow-x: hidden;
+    }
+
+    #actions {
+        margin: 20px 0;
+    }
+
+    a,
+    a:focus {
+        color: #FF00B1;
+        padding: 0;
+        margin: 2px 0;
+        outline: 0;
+        text-decoration: none;
+    }
+
+    a:hover {
+        cursor: pointer;
+    }
+
+    button,
+    button:focus {
+        width: 100px;
+        margin: 0 0 30px 0;
+        background-color: #FFF;
+        border: 1px solid #000;
+        padding: 10px 0;
+        outline: 0;
+    }
+
+    button:hover {
+        background-color: #000;
+        color: #FFF;
+        border: 1px solid #FFF;
+        cursor: pointer;
+    }
+
+    p {
+        padding: 0;
+        margin: 5px 0;
+    }
+
+    </style>
+</head>
+
+<body>
+    <div id="data"></div>
+    <div id="actions">
+        <a href="">Import Data</a>
+        <br>
+        <input style="display:none;" type="file" id="choose-file" />
+        <p>// e.g. if you have used Data Selfie in a different browser or computer before</p>
+        <button id="import">Import</button>
+        <br>
+        <a href="">Export Your Data</a>
+        <br>
+        <p>// download your data as a json file</p>
+        <button id="backup">Export</button>
+        <br>
+        <a href="">Delete Your Data</a>
+        <br>
+        <p>// remove any records from Data Selfie from your computer, this is final, there is no other place your data is stored</p>
+        <button id="delete">Delete</button>
+        <br>
+        <script src="../js/manage.js"></script>
+    </div>
+</body>
+
+</html>

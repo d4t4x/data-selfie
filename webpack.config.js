@@ -16,6 +16,7 @@ module.exports = {
         content: "./js/content.js",
         background: "./js/background.js",
         me: "./js/views/me.js",
+        manage: "./js/views/manage.js",
         options: "./js/views/options.js",
         popup: "./js/views/popup.js"
     },

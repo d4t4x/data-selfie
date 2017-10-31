@@ -85,19 +85,17 @@ function generalListeners() {
                 });
                 break;
             case "backup":
-                console.log("test just callback")
-                // helper.backup(db);
+                helper.backup(db);
                 break;
             case "import":
-                console.log("import data");
                 if (req.data.dataselfie != undefined) {
-                    helper.import(db, req.data.dataselfie);
+                    helper.import(db, req.data.dataselfie, sender.tab.id);
                 } else {
-                    helper.importError();
+                    helper.importError(sender.tab.id);
                 }
                 break;
             case "delete":
-                helper.resetDB(db, initDB);
+                helper.resetDB(db, initDB, sender.tab.id);
                 chrome.storage.local.clear(initOptions);
                 break;
             case "saveLooked":

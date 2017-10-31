@@ -38,10 +38,11 @@ module.exports = {
             url: "data:text/json," + JSON.stringify(data, null, 2),
             filename: "./dataselfie_" + moment().format('YYYY-MM-DD') + ".json",
             conflictAction: "overwrite", // "uniquify" / "overwrite" / "prompt"
-            saveAs: false, // true gives save-as dialogue
+            saveAs: false // true gives save-as dialogue
         }, this.downloadBar());
     },
     backup: function(_db) {
+        // FIX downloads permission might not be needed anymore, now in Manage Your Data page
         var obj = { dataselfie: {} };
         var self = this;
         _db.transaction('r', _db.tables, function() {
@@ -56,11 +57,12 @@ module.exports = {
             console.error(err.stack);
         });
     },
-    importError: function() {
+    importError: function(tabid) {
         console.log("%c[DB][<<] import (json) error", clog.magenta);
         alert("There has been error. Please make sure your file is a valid json and try importing again.");
+        chrome.tabs.sendMessage(tabid, { displaydata: true });
     },
-    import: function(_db, data) {
+    import: function(_db, data, tabid) {
         var self = this;
         _db.transaction("rw", _db.looked, _db.clicked, _db.typed, _db.timespent, _db.pages, function() {
             for (var i = 0; i < data.looked.length; i++) {
@@ -81,12 +83,13 @@ module.exports = {
         }).then(function() {
             console.log("%c[DB][<<] import complete", clog.magenta);
             alert("Data was imported.");
+            chrome.tabs.sendMessage(tabid, { displaydata: true });
         }).catch(function(err) {
             console.error(err.stack);
             self.importError();
         });
     },
-    resetDB: function(_db, _callback) {
+    resetDB: function(_db, _callback, tabid) {
         _db.delete().then(function() {
             console.log("%c[DB][<<] deleted", clog.magenta);
         }).catch(function(err) {
@@ -94,6 +97,7 @@ module.exports = {
         }).finally(function() {
             if (_callback) { _callback(); };
             alert("Database was deleted.");
+            chrome.tabs.sendMessage(tabid, { displaydata: true });
         });
     },
     checkCrash: function(_db, _table) {
