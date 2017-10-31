@@ -41,9 +41,11 @@ Work in progress. Some information might not apply.
 
 ## How to run (locally)
 
+- ```npm install```
 - to make a build (folder) from src ```npm run build```
 - to make a build and watch for changes ```npm run buildw```
 - to make a build and minify etc (see webpack.config.js) ```npm run buildprod```
+    - use this to reproduce the code submitted to Firefox Add-ons or Chrome Web Store
 
 #### Chrome extension
 
