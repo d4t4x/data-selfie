@@ -653,10 +653,11 @@ var loadImgClassifications = function() {
                     .value();
                 var capped = _.take(sortedClasses, 10);
                 fillImgList(capped);
+                $("#valid-imgs").text("(" + validImgs.length + " valid) ");
             } else {
                 body.find(".yolo-content p.error").text("Unfortunately, there are no valid images that can be analyzed.").show();
             }
-            console.log("%cobject detection", helper.clog.green, validImgs + " valid imgs", sortedClasses, capped);
+            console.log("%cobject detection", helper.clog.green, validImgs.length + " valid imgs", sortedClasses, capped);
         });
     });
 }
@@ -900,7 +901,7 @@ var apis = {
                 .uniq()
                 .value();
             console.log("%cimages from posts you looked at", helper.clog.green, allImgUrls);
-            $("#total-urls").text("(" + allImgUrls.length + " in total)");
+            $("#total-urls").text("(of " + allImgUrls.length + " in total) ");
 
             var withoutPred = _(allImgPosts)
                 .filter(function(o) {
