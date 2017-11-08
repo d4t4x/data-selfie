@@ -7,9 +7,6 @@ chrome.browserAction.getBadgeText({}, function(text){
 
 $("button").click(function(e) {
     switch (e.target.id) {
-        case "extensionslink":
-            chrome.tabs.create({ url: "chrome://extensions" });
-            break;
         case "me":
             chrome.tabs.create({ url: chrome.runtime.getURL("views/me.html") });
             break;

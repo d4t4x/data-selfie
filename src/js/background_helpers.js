@@ -59,8 +59,10 @@ module.exports = {
     },
     importError: function(tabid) {
         console.log("%c[DB][<<] import (json) error", clog.magenta);
-        alert("There has been error. Please make sure your file is a valid json and try importing again.");
-        chrome.tabs.sendMessage(tabid, { displaydata: true });
+        chrome.tabs.sendMessage(tabid, {
+            displaydata: true,
+            msg: "There has been error. Please make sure your file is a valid json and try importing again."
+        });
     },
     import: function(_db, data, tabid) {
         var self = this;
@@ -82,8 +84,10 @@ module.exports = {
             }
         }).then(function() {
             console.log("%c[DB][<<] import complete", clog.magenta);
-            alert("Data was imported.");
-            chrome.tabs.sendMessage(tabid, { displaydata: true });
+            chrome.tabs.sendMessage(tabid, {
+                displaydata: true,
+                msg: "Data was imported."
+            });
         }).catch(function(err) {
             console.error(err.stack);
             self.importError();
@@ -96,8 +100,10 @@ module.exports = {
             console.error("%cCould not delete [DB][<<]", clog.magenta);
         }).finally(function() {
             if (_callback) { _callback(); };
-            alert("Database was deleted.");
-            chrome.tabs.sendMessage(tabid, { displaydata: true });
+            chrome.tabs.sendMessage(tabid, {
+                displaydata: true,
+                msg: "Database was deleted."
+            });
         });
     },
     checkCrash: function(_db, _table) {

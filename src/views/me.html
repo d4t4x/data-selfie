@@ -35,7 +35,7 @@
         <div id="init-message" style="display: none">Your local database is empty.
             <br>You have to use Facebook (after installation) in this browser to see your analyzed and predicted data.
             <br>
-            <br>If you have, but the counter for the seconds you look at posts (see <a href="http://vimeo.com/d4t4x/dataselfie" target="_blank">demo video</a>) is not shown in the bottom left, then your browser/Facebook account might not be compatible with Data Selfie. Check out <a href="http://dataselfie.it/faq" target="_blank"> our FAQs</a>, <a href="https://vimeo.com/album/4796949" target="_blank">support videos</a> or <a href="https://github.com/d4t4x/data-selfie/issues/" target="_blank">github issues</a> for possible solutions or hacks. Really very sorry for this inconvenience!
+            <br>If you have done so, but the seconds counter for how long you look at various posts (see <a href="http://vimeo.com/d4t4x/dataselfie" target="_blank">demo video</a>) is not shown in the bottom left, then your browser/Facebook account might not be compatible with Data Selfie. Check out <a href="http://dataselfie.it/faq" target="_blank"> our FAQs</a>, <a href="https://vimeo.com/album/4796949" target="_blank">support videos</a> or <a href="https://github.com/d4t4x/data-selfie/issues/" target="_blank">github issues</a> for possible solutions or hacks or how you might be able to contribute, so this problem can be solved. Really very sorry for this inconvenience!
             <br>
             <br>Visit <a href="http://dataselfie.it/faq" target="_blank">FAQ + Terms of Use</a> for more information.
             <br>Consider helping us improve the open source code on <a href="https://github.com/d4t4x/data-selfie" target="_blank">github</a>.</div>
@@ -54,7 +54,7 @@
             <ul class="wrapper col-3" id="top-wrapper">
                 <li>
                     <div class="container" id="top-user-container">
-                        <div class="container-title">Top friends</div>
+                        <div class="container-title">Top friends <span></span></div>
                         <div class="content" id="top-user">
                             <p>Time spent (in sec) on friends' posts</p>
                             <p class="last-updated">updated: <span>now</span></p>
@@ -63,7 +63,7 @@
                 </li>
                 <li>
                     <div class="container" id="top-page-container">
-                        <div class="container-title">Top pages</div>
+                        <div class="container-title">Top pages <span></span></div>
                         <div class="content" id="top-page">
                             <p>Time spent (in sec) on pages' posts</p>
                             <p class="last-updated">updated: <span>now</span></p>
@@ -72,7 +72,7 @@
                 </li>
                 <li>
                     <div class="container" id="top-like-container">
-                        <div class="container-title">Top Likes</div>
+                        <div class="container-title">Top Likes <span></span></div>
                         <div class="content" id="top-like">
                             <p>Likes for posts, photos or videos</p>
                             <p class="last-updated">updated: <span>now</span></p>
@@ -84,9 +84,26 @@
                 <div></div>
             </div>
             <div id="loading" style="display: none">Loading...</div>
-            <div id="usage-message"></div>
+            <div id="usage-message">
+                <div id="server-err" style="display: none"><span class="warning">attention:</span> Server error, please refresh page or try again at another time.</div>
+                <div id="not-enough" style="display: none"><span class="warning">attention:</span> Not enough data yet. There is not enough consumption. You need to scroll through your feed, consider typing more (e.g. commenting or private messages), so Data Selfie can make predictions. The more time you spend on Facebook the faster you will get your predictions.</div>
+            </div>
         </div>
         <div id="the-good-stuff">
+            <ul class="wrapper col-1">
+                <li>
+                    <div class="container" id="yolo-container">
+                        <div class="container-title">Object Detection</div>
+                        <div class="tech-label" data-tooltip="Open source machine learning algorithm for object detection called YOLO was used to generate this analysis (check github).">ML</div>
+                        <div class="content yolo-content" id="yolo-pred">
+                            <p>From the (valid) images <span id="total-urls"></span> in your feed that you have looked at, image urls can expire or the algorithm simply can't recognize any object (image becomes invalid) <span id="img-pred-threshold"></span>, one image can have multiple objects</p>
+                            <p class="error"></p>
+                            <p id="still-loading">Still analyzing... don't close window.</p>
+                            <p class="last-updated yolo-last">updated: <span>-</span></p>
+                        </div>
+                    </div>
+                </li>
+            </ul>
             <ul class="wrapper col-2" id="alchemy-wrapper">
                 <li>
                     <div class="container" id="keywords-container">
@@ -94,6 +111,7 @@
                         <div class="tech-label" data-tooltip="Natural Language Processing from IBM Watson was used to generate this analysis.">NLP</div>
                         <div class="content alchemy-content" id="">
                             <p>Relevance (0 - 1) and sentiment (-1 - 1) of important keywords in recent content you have looked, ranked by relevance</p>
+                            <p class="error"></p>
                             <div class="Rtable Rtable--4cols-s-s-m"></div>
                             <p class="last-updated alchemy-last">updated: <span>- (not enough data)</span></p>
                         </div>
@@ -105,6 +123,7 @@
                         <div class="tech-label" data-tooltip="Natural Language Processing from IBM Watson was used to generate this analysis.">NLP</div>
                         <div class="content alchemy-content" id="">
                             <p>Relevance (0 - 1) and sentiment (-1 - 1) of people, organizations, places, a.o. from recent content you have looked at</p>
+                            <p class="error"></p>
                             <div class="Rtable Rtable--4cols-s-s-m"></div>
                             <p class="last-updated alchemy-last">updated: <span>- (not enough data)</span></p>
                         </div>
@@ -118,6 +137,7 @@
                         <div class="tech-label" data-tooltip="Natural Language Processing from IBM Watson was used to generate this analysis.">NLP</div>
                         <div class="content alchemy-content" id="">
                             <p>Relevance (0 - 1) of general concepts that aren’t necessarily directly referenced in recent content</p>
+                            <p class="error"></p>
                             <div class="Rtable Rtable--2cols"></div>
                             <p class="last-updated alchemy-last">updated: <span>- (not enough data)</span></p>
                         </div>
@@ -129,7 +149,8 @@
                         <div class="tech-label" data-tooltip="Machine Learning from IBM and the University of Cambridge was used to generate this analysis.">ML</div>
                         <div class="content applymagicsauce-content" id="">
                             <p>What you type and the facebook pages you see in your feed result in this prediction of your Big 5,
-                                <br>E.g. 20th percentile means 20% of general population has lower and 80% has higher score</p>
+                            E.g. 20th percentile means 20% of general population has lower and 80% has higher score</p>
+                            <p class="error"></p>
                             <div id="ocean-vis"></div>
                             <p class="last-updated applymagicsauce-last">updated: <span>- (not enough data)</span></p>
                         </div>
@@ -143,7 +164,8 @@
                         <div class="tech-label" data-tooltip="Machine Learning API from the University of Cambridge was used to generate this analysis.">ML</div>
                         <div class="content applymagicsauce-content" id="">
                             <p style="min-height: 50px;">The pages you see in your feed suggest this,
-                                <br>Other category includes Atheists, Agnostics, Buddhists, Jedis, Muslims, Pastafarians</p>
+                                Other category includes Atheists, Agnostics, Buddhists, Jedis, Muslims, Pastafarians</p>
+                            <p class="error"></p>
                             <ul id="religion-chart"></ul>
                             <p class="last-updated applymagicsauce-last">updated: <span>- (not enough data)</span></p>
                         </div>
@@ -155,6 +177,7 @@
                         <div class="tech-label" data-tooltip="Machine Learning API from the University of Cambridge was used to generate this analysis.">ML</div>
                         <div class="content applymagicsauce-content" id="">
                             <p style="min-height: 50px;">The pages you see in your feed suggest this</p>
+                            <p class="error"></p>
                             <ul id="politics-chart"></ul>
                             <p class="last-updated applymagicsauce-last">updated: <span>- (not enough data)</span></p>
                         </div>
@@ -166,7 +189,8 @@
                         <div class="tech-label" data-tooltip="Machine Learning API from the University of Cambridge was used to generate this analysis.">ML</div>
                         <div class="content applymagicsauce-content" id="">
                             <p>Based on pages in your feed,
-                                <br> the percentile is in relation to the general population</p>
+                            the percentile is in relation to the general population</p>
+                            <p class="error"></p>
                             <div class="Rtable Rtable--2cols-m"></div>
                             <p class="last-updated applymagicsauce-last">updated: <span>- (not enough data)</span></p>
                         </div>
@@ -180,6 +204,7 @@
                         <div class="tech-label" data-tooltip="Machine Learning algorithm from IBM was used to generate this analysis.">ML</div>
                         <div class="content personality-content" id="">
                             <p>Based on what you type your personality (Big 5), values and needs are predicted and these preferences can be produced</p>
+                            <p class="error"></p>
                             <div class="Rtable Rtable--2cols-l"></div>
                             <p class="last-updated personality-last">updated: <span>- (not enough data)</span></p>
                         </div>
@@ -191,6 +216,7 @@
                         <div class="tech-label" data-tooltip="Machine Learning algorithm from IBM was used to generate this analysis.">ML</div>
                         <div class="content personality-content" id="">
                             <p>Based on what you type your personality (Big 5), values and needs are predicted and these preferences can be produced</p>
+                            <p class="error"></p>
                             <div class="Rtable Rtable--2cols-l"></div>
                             <p class="last-updated personality-last">updated: <span>- (not enough data)</span></p>
                         </div>

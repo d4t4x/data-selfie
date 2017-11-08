@@ -1,5 +1,6 @@
 var Filesaver = require('../libs/filesaver.js'),
     $data = $("#data"),
+    $status = $("#status p"),
     db,
     localData;
 
@@ -77,6 +78,7 @@ function downloadData() {
 function start() {
     openData();
     $("button").click(function(e) {
+        $status.text("");
         switch (e.target.id) {
             case "backup":
                 getData();
@@ -96,6 +98,9 @@ function start() {
     chrome.runtime.onMessage.addListener(function(req, sender, sendRes) {
         if (req.displaydata) {
             openData();
+        }
+        if (req.msg) {
+            $status.text(req.msg);
         }
     });
     $("#choose-file").change(readSingleFile);

@@ -134,6 +134,10 @@ function generalListeners() {
                 break;
             case "init db":
                 initDB(true);
+                break;
+            case "ds":
+                chrome.tabs.create({ url: chrome.runtime.getURL("views/me.html") });
+                break;
         }
     });
 }
@@ -174,8 +178,9 @@ function initDB(notify) {
         alert("There has been an error. Database was not initiated.");
     }).finally(function() {
         console.log("%c[DB][<<] opened", helper.clog.magenta);
+        // FIX might not need
         if (notify != false) {
-            alert("Database was initiated.");
+            console.log("Database was initiated.");
         }
     });
 }

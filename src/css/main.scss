@@ -9,7 +9,8 @@ $yellow: #FFFF00;
 $red: #e91e53;
 $w2: #CCC;
 $baseFontSize: 12;
-$fontFamily: "Menlo", monospace;
+$fontFamily: "Menlo",
+monospace;
 
 body {
     background-color: $b;
@@ -153,6 +154,10 @@ footer {
     display: none;
 }
 
+#loading {
+    animation: fade 1s linear infinite alternate;
+}
+
 #funnel {
     height: $baseU * 2 + px;
     margin: $baseU * 2 + px $baseU * 1 + px $baseU * 4 + px $baseU * 1 + px;
@@ -264,9 +269,11 @@ footer {
             p {
                 margin: 0 0 1em 0;
                 color: $w2;
+                white-space: pre-line;
             }
             .error {
                 color: #999;
+                display: none;
             }
             .last-updated {
                 margin: 0;
@@ -275,8 +282,17 @@ footer {
                 right: 10px;
                 font-size: 10px;
             }
+            #still-loading {
+                margin: 0;
+                position: absolute;
+                bottom: 5px;
+                left: 10px;
+                font-size: 10px;
+                animation: fade 1s linear infinite alternate;
+                display: none;
+            }
             .tab {
-                width: 40px;
+                width: 50px;
                 display: inline-block;
             }
             .line,
@@ -386,6 +402,7 @@ footer {
         text-align: center;
         margin: 0;
         padding: 5px 0 0 0;
+        white-space: pre-line;
     }
 }
 
@@ -433,5 +450,18 @@ footer {
         overflow-wrap: break-word;
         padding: 5px;
         background-color: rgba(0, 0, 0, 0.8);
+        white-space: pre-line;
+        &:hover {
+            cursor: pointer;
+        }
+    }
+}
+
+@keyframes fade {
+    0% {
+        opacity: 0.4;
+    }
+    100% {
+        opacity: 1;
     }
 }

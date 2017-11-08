@@ -37,24 +37,30 @@
         color: #000;
     }
 
-    #update {
+    #update-chrome, #update-firefox {
         display: none;
     }
 
-    #update span {
-        color: #FFF;
-        color: lime;
+    .update span {
+        color: #21FF06;
         background-color: #000;
     }
     </style>
 </head>
 
 <body>
-    <div id="update">
+    <div class="update" id="update-chrome">
         <p><span>There is a new update available.
         <br>It will be updated soon!</span>
-            <br>You can manually update it yourself by going to <a href="chrome://extensions" id="extensionslink">chrome://extensions</a>.
+            <br>You can manually update it yourself by going to <span>chrome://extensions</span>.
             <br>At the top right, check <i>"Developer Mode"</i>. Right below, click <i>"Update extensions now"</i>.
+        </p>
+        <hr>
+    </div>
+    <div class="update" id="update-firefox">
+        <p><span>There is a new update available.
+        <br>It will be updated soon!</span>
+            <br>You can check the update manually at <span>about:addons</span>.
         </p>
         <hr>
     </div>

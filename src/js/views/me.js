@@ -3,7 +3,8 @@ var helper = require("./me_helpers.js"),
     dbstores = require("../dbstores.js"),
     apiThreshold = require("../api-threshold.js"),
     apiUrl = "http://api.dataselfie.it/",
-    ////////////////////////////////////////////////////////////// DEV SERVER
+    //////////////////////////////////////////////////////////////////////////
+    // DEV SERVER, also need to add it to permissions
     // apiUrl = "http://localhost:3000/",
     db,
     d3 = require("d3"),
@@ -140,14 +141,15 @@ var activity = {
                     .duration(20)
                     .style("opacity", .9);
                 var target = d3.event.target.classList.value;
+                var text = "";
                 if (target == "elLooked") {
-                    var html = d.postActivity + "<br>" + d.postDesc[0] + "...<br> (" + moment.parseZone(d.timestamp).format("hh:mm:sa") + ")";
+                    text = d.postActivity + "\n" + d.postDesc[0] + "...\n(" + moment.parseZone(d.timestamp).format("hh:mm:sa") + ")";
                 } else if (target == "elClicked") {
-                    var html = d.url + "<br> (" + moment.parseZone(d.timestamp).format("hh:mm:sa") + ")";
+                    text = d.url + "\n(" + moment.parseZone(d.timestamp).format("hh:mm:sa") + ")";
                 } else {
-                    var html = d.content + "<br> (" + moment.parseZone(d.timestamp).format("hh:mm:sa") + ")";
+                    text = d.content + "\n(" + moment.parseZone(d.timestamp).format("hh:mm:sa") + ")";
                 }
-                self.tooltip.html(html)
+                self.tooltip.text(text)
                     .style("left", (d3.event.pageX - offset) + "px")
                     .style("top", (d3.event.pageY - 100) + "px");
             })
@@ -162,11 +164,11 @@ var activity = {
 var topList = {
     title: function(type, len) {
         var limit = _.min([len, 10]);
-        $("#top-" + type + "-container .container-title").append(" (" + limit + " of " + len + ")");
+        $("#top-" + type + "-container .container-title span").text(" (" + limit + " of " + len + ")");
 
     },
     list: function(type) {
-        $("#top-" + type + " .error").html("");
+        $("#top-" + type + " .error").empty();
         var self = this;
         db.looked.filter(function(item) {
             return item.posters[0].type == type;
@@ -190,24 +192,35 @@ var topList = {
             if (capped.length > 0) {
                 self.fillList(type, capped);
             } else {
-                $("#top-" + type).append('<p class="error">No activity tracked yet.</p>');
+                $("#top-" + type)
+                    .append($("<p>", { class: "error" })
+                        .text("No activity tracked yet.")
+                        .css("display", "block"));
             }
         });
     },
     fillList: function(type, list) {
-        var html = "";
         for (var i = 0; i < list.length; i++) {
             var perc = _.round(list[i].duration / list[0].duration, 2) * 100,
                 rest = 100 - perc;
-            html += '<span class="looked-text tab">' + list[i].duration + '</span>\t' + list[i].name +
-                '<br><div class="line" style="width: ' + perc + '%"></div><div class="line-dashed" style="width: ' + rest + '%"></div>';
+            $("#top-" + type)
+                .append($("<span>", { class: "looked-text tab" }).text(list[i].duration))
+                .append($("<span>").text(list[i].name))
+                .append($("<br>"))
+                .append($("<div>", { class: "line" }).css("width", perc + "%"))
+                .append($("<div>", { class: "line-dashed" }).css("width", rest + "%"));
         };
-        $("#top-" + type).append(html);
     },
     likes: function() {
-        $("#top-like .error").html("");
+        $("#top-like .error").empty();
         var likes = [],
-            orderedLikes = [];
+            orderedLikes = [],
+            errMsg = function() {
+                $("#top-like")
+                    .append($("<p>", { class: "error" })
+                        .text("No activity tracked yet.")
+                        .css("display", "block"));
+            };
         db.clicked.filter(function(item) {
             return item.type == "like" && (item.url.indexOf("/posts/") > -1 || item.url.indexOf("/photos/") > -1 || item.url.indexOf("/videos/") > -1);
         }).each(function(like) {
@@ -219,7 +232,9 @@ var topList = {
                 .map(function(count, path) {
                     return { count: count, path: path }
                 })
-                .sortBy('count').reverse().value();
+                .sortBy('count')
+                .reverse()
+                .value();
             return orderedLikes;
         }).then(function() {
             console.log("%clike", helper.clog.blue, orderedLikes);
@@ -231,44 +246,51 @@ var topList = {
                             var perc = _.round(orderedLikes[i].count / orderedLikes[0].count, 2) * 100,
                                 rest = 100 - perc,
                                 pName = (entry) ? entry.posters[0].name : orderedLikes[i].path;
-                            var html = '<span class="clicked-like-text tab">' + orderedLikes[i].count + '</span>\t' + pName + '<br><div class="line" style="width: ' + perc + '%"></div><div class="line-dashed" style="width: ' + rest + '%"></div>';
-                            $("#top-like").append(html);
+                            $("#top-like")
+                                .append($("<span>", { class: "clicked-like-text tab" }).text(orderedLikes[i].count))
+                                .append($("<span>").text(pName))
+                                .append($("<br>"))
+                                .append($("<div>", { class: "line" }).css("width", perc + "%"))
+                                .append($("<div>", { class: "line-dashed" }).css("width", rest + "%"));
                             i++;
                             if (i < len) {
                                 addLike(i);
                             } else {
-                                $("#top-like-container .container-title").append(" (" + len + " of " + orderedLikes.length + ")");
+                                $("#top-like-container .container-title span").text(" (" + len + " of " + orderedLikes.length + ")");
                             }
                         });
                     };
                 addLike(i);
             } else {
-                $("#top-like").append('<p class="error">No activity tracked yet.</p>');
+                errMsg()
             }
         }).catch(function(err) {
-            $("#top-like").append('<p class="error">No activity tracked yet.</p>');
+            console.log("Likes count error: " + err);
+            errMsg();
         });
     }
 }
 
 var nlpList = {
     list: function(data, name) {
-        $("#" + name + "-container .Rtable").html("");
+        $("#" + name + "-container .Rtable").empty();
         _.each(_.take(data, 10), function(item) {
-            $("#" + name + "-container .Rtable").append(
-                '<div class="cell looked-text">' + _.round(item.relevance, 2) + '</div><div class="cell">' + item.text + '</div>'
-            );
+            $("#" + name + "-container .Rtable")
+                .append($("<div>", { class: "cell looked-text" }).text(_.round(item.relevance, 2)))
+                .append($("<div>", { class: "cell" }).text(item.text));
         });
     },
     sentList: function(data, name) {
-        $("#" + name + "-container .Rtable").html("");
+        $("#" + name + "-container .Rtable").empty();
         _.each(_.take(data, 10), function(item) {
             var sentScore = (item.sentiment) ? _.round(item.sentiment.score, 2) : "&#177;0.00",
                 type = (item.sentiment) ? item.sentiment.type : "";
             sentScore = (item.sentiment > 0) ? "+" + sentScore : sentScore;
-            $("#" + name + "-container .Rtable").append(
-                '<div class="cell looked-text">' + _.round(item.relevance, 2) + '</div><div class="cell">' + sentScore + '</div><div class="cell">' + type + '</div><div class="cell">' + item.text + '</div>'
-            );
+            $("#" + name + "-container .Rtable")
+                .append($("<div>", { class: "cell looked-text" }).text(_.round(item.relevance, 2)))
+                .append($("<div>", { class: "cell" }).text(sentScore))
+                .append($("<div>", { class: "cell" }).text(type))
+                .append($("<div>", { class: "cell" }).text(item.text));
         });
     },
 }
@@ -276,7 +298,7 @@ var nlpList = {
 var oceanPlot = function(dataIBM, dataAMS) {
     console.log("%cbig 5", helper.clog.yellow, dataIBM);
     console.log("%cbig 5", helper.clog.green, dataAMS);
-    $("#ocean-vis").html("");
+    $("#ocean-vis").empty();
     // SETUP
     w = $("#ocean-vis").width(),
         h = 260,
@@ -376,7 +398,7 @@ var oceanPlot = function(dataIBM, dataAMS) {
             .data(dataIBM)
             .enter()
             .append("path")
-            .attr("class", "ibmocean")
+            .attr("class", "ibmocean point")
             .attr("d", function(d, i) {
                 var size = elSize,
                     x = xScale(_.round(d.percentile, 2) * 100) - size / 2,
@@ -392,7 +414,7 @@ var oceanPlot = function(dataIBM, dataAMS) {
             .data(dataAMS)
             .enter()
             .append("path")
-            .attr("class", "amsocean")
+            .attr("class", "amsocean point")
             .attr("d", function(d, i) {
                 var size = elSize,
                     x = xScale(_.round(d.value, 2) * 100) - size / 2,
@@ -402,72 +424,123 @@ var oceanPlot = function(dataIBM, dataAMS) {
                 return "M " + x + " " + y + " h " + size + " M " + x2 + " " + y2 + " v " + size;
             });
     }
+
+    svg.selectAll(".point")
+        .on("mouseover", function(d) {
+            tooltip.transition()
+                .duration(20)
+                .style("opacity", .9);
+            var target = d3.event.target.classList.value;
+            var text = "";
+            if (target.indexOf("ibmocean") > -1) {
+                text = "based on what \nyou typed";
+            } else {
+                text = "based on what \nyou looked at";
+            }
+            tooltip.text(text)
+                .style("left", d3.event.layerX + 20 + "px")
+                .style("top", d3.event.layerY + 0 + "px")
+                .style("width", "110px");
+        })
+        .on("mouseout", function(d) {
+            tooltip.transition()
+                .delay(400)
+                .duration(100)
+                .style("opacity", 0);
+        });
 }
 
 var religionList = function(rels) {
     console.log("%creligion", helper.clog.green, rels);
-    $("#religion-chart").html("");
+    $("#religion-chart").empty();
     _.each(_.orderBy(rels, "trait"), function(item) {
         var val = _.round(item.value * 100, 0);
-        var label = (item.trait.indexOf("Other") > -1) ? "Christian <br>+ Other" : _.replace(item.trait, "Religion_", "");
-        $("#religion-chart").append(
-            '<li class="bar-6"><div><div style="height: ' + val + '%"></div></div><p><span class="looked-text">' + val + ' %</span><br>' + label + '</p></li>'
-        );
+        var label = (item.trait.indexOf("Other") > -1) ? "Christian \n+ Other" : _.replace(item.trait, "Religion_", "");
+        $("#religion-chart")
+            .append($("<li>", { class: "bar-6" })
+                .append($("<div>")
+                    .append($("<div>").css("height", val + "%"))
+                )
+                .append($("<p>")
+                    .append($("<span>", { class: "looked-text" }).text(val + " %"))
+                )
+                .append($("<p>").text(label))
+            );
     })
 }
 
 var politicsList = function(pols) {
     console.log("%cpolitics", helper.clog.green, pols);
-    $("#politics-chart").html("");
+    $("#politics-chart").empty();
     _.each(_.orderBy(pols, "trait"), function(item) {
         var val = _.round(item.value * 100, 0);
         var label = _.replace(item.trait, "Politics_", "");
         label = label === "Libertanian" ? "Libertarian" : label;
-        $("#politics-chart").append(
-            '<li class="bar-4"><div><div style="height: ' + val + '%"></div></div><p><span class="looked-text">' + val + ' %</span><br>' + label + '</p></li>'
-        );
+        $("#politics-chart")
+            .append($("<li>", { class: "bar-4" })
+                .append($("<div>")
+                    .append($("<div>").css("height", val + "%"))
+                )
+                .append($("<p>")
+                    .append($("<span>", { class: "looked-text" }).text(val + " %"))
+                )
+                .append($("<p>").text(label))
+            );
     })
 }
 
 var consumptionPrefList = function(prefs) {
-    $("#shopping-container .Rtable").html("");
+    $("#shopping-container .Rtable").empty();
     var shopping = _(prefs).filter(function(item) {
         return _.includes(item.consumption_preference_category_id, "shopping");
     }).map("consumption_preferences").flatten().each(function(item) {
         if (item.name.indexOf("automobiles") == -1) {
             var likelyText = (item.score == 1) ? "Likely to " : "Not likely to ";
-            $("#shopping-container .Rtable").append('<div class="typed-text cell">' + likelyText + '</div><div class="cell">' + _.replace(item.name, "Likely to ", "") + '</div>');
+            $("#shopping-container .Rtable")
+                .append($("<div>", { class: "typed-text cell" }).text(likelyText))
+                .append($("<div>", { class: "cell" }).text(_.replace(item.name, "Likely to ", "")));
         }
     });
-    $("#health-container .Rtable").html("");
+    $("#health-container .Rtable").empty();
     var health = _(prefs).filter(function(item) {
         return _.includes(item.consumption_preference_category_id, "health") || _.includes(item.consumption_preference_category_id, "entrepreneurship") || _.includes(item.consumption_preference_category_id, "environment");
     }).map("consumption_preferences").flatten().each(function(item) {
         var likelyText = (item.score == 1) ? "Likely to " : "Not likely to ";
-        $("#health-container .Rtable").append('<div class="typed-text cell">' + likelyText + '</div><div class="cell">' + _.replace(item.name, "Likely to ", "") + '</div>');
+        $("#health-container .Rtable")
+            .append($("<div>", { class: "typed-text cell" }).text(likelyText))
+            .append($("<div>", { class: "cell" }).text(_.replace(item.name, "Likely to ", "")));
     });
 }
 
 var otherPredList = function(preds, interoprets) {
-    $("#other-predictions-container .Rtable").html("");
-    var html = [];
+    var otherPredContainer = $("#other-predictions-container .Rtable");
+    otherPredContainer.empty();
     var intelligent = _.find(preds, { "trait": "Intelligence" });
-    html[0] = '<div class="looked-text cell">' + _.round(intelligent.value * 100, 0) + 'th percentile</div><div class="cell">' + intelligent.trait + '</div>';
+    otherPredContainer.append($("<div>", { class: "looked-text cell" }).text(_.round(intelligent.value * 100, 0) + "th percentile"))
+        .append($("<div>", { class: "cell" }).text(intelligent.trait));
+
     var satisfied = _.find(preds, { "trait": "Satisfaction_Life" });
-    html[1] = '<div class="looked-text cell">' + _.round(satisfied.value * 100, 0) + 'th percentile</div><div class="cell">Life Satisfaction</div>';
+    otherPredContainer.append($("<div>", { class: "looked-text cell" }).text(_.round(satisfied.value * 100, 0) + "th percentile"))
+        .append($("<div>", { class: "cell" }).text("Life Satisfaction"));
+
     var female = _.find(preds, { "trait": "Female" });
     var prob = (female.value >= 0.5) ? _.round(female.value * 100, 0) : _.round((1 - female.value) * 100, 0);
     var gender = (female.value >= 0.5) ? "Female" : "Male";
-    html[2] = '<div class="looked-text cell">' + prob + '%</div><div class="cell">' + gender + ' (psychological gender)</div>';
-    var leadership = _.find(interoprets, { "trait": "Leadership" });
-    html[3] = '<div class="looked-text cell">' + _.round(leadership.value * 100, 0) + '%</div><div class="cell">' + leadership.trait + '</div>';
+    otherPredContainer.append($("<div>", { class: "looked-text cell" }).text(prob + "%"))
+        .append($("<div>", { class: "cell" }).text(gender + " \n(psychological gender)"));
 
-    $("#other-predictions-container .Rtable").append(_.join(html, ""));
+    var leadership = _.find(interoprets, { "trait": "Leadership" });
+    otherPredContainer.append($("<div>", { class: "looked-text cell" }).text(_.round(leadership.value * 100, 0) + "%"))
+        .append($("<div>", { class: "cell" }).text(leadership.trait));
+
 }
 
 var loadPredictions = function(key) {
     var noPrediction = function(name) {
-        $("#" + name + "-container .content").append('<p class="error">No analysis could be made.</p>');
+        $("#" + name + "-container .content")
+            .append($("<p>", { class: "error" })
+                .text("No analysis could be made.")
+                .css("display", "block"));
     }
     chrome.storage.local.get(null, function(res) {
         if (res.alchemy && key == "alchemy") {
@@ -521,9 +594,9 @@ var loadPredictions = function(key) {
 
         if (key == "reveal") {
             $("#loading").delay(2000).hide(function() {
-                // at least have some looked content enough to make an ams prediction
+                // have any kind of prediction!
                 if (res.applymagicsauce || res.personality || res.alchemy) {
-                    // FIX delay and fade in
+                    $("#the-cool-stuff").animate({ opacity: 1 }, 500);
                     $("#usage-message").delay(200).hide();
                     $("#the-good-stuff").delay(200).css('position', 'relative').animate({ opacity: 1 }, 200);
                 } else {
@@ -535,27 +608,82 @@ var loadPredictions = function(key) {
     });
 };
 
+var loadImgClassifications = function() {
+    body.find(".yolo-last span").text(moment().format("MMM-DD-YY"));
+    var fillImgList = function(capped) {
+        for (var i = 0; i < capped.length; i++) {
+            var perc = _.round(capped[i].count / capped[0].count, 2) * 100,
+                rest = 100 - perc;
+            $("#yolo-pred")
+                .append($("<span>", { class: "looked-text tab" }).text(capped[i].count))
+                .append($("<span>").text(capped[i].cclass))
+                .append($("<br>"))
+                .append($("<div>", { class: "line" }).css("width", perc + "%"))
+                .append($("<div>", { class: "line-dashed" }).css("width", rest + "%"));
+        };
+    }
+    db.transaction("r", db.looked, function() {
+        db.looked.toArray(function(arr) {
+            return _(arr)
+                .filter(function(o) { return o.predImg })
+                .filter(function(o) { return o.predImg.pred !== null })
+                .uniqBy('postImg')
+                .value();
+        }).then(function(validImgs) {
+            var imgPredThreshold = 0.5;
+            $("#img-pred-threshold").text("\nshown classifications have a probability of >= " + imgPredThreshold);
+            var classes = _(validImgs)
+                .map('predImg')
+                .map('pred')
+                .flatten()
+                .filter(function(o) { return o.prob >= imgPredThreshold })
+                .map('class')
+                .value();
+            $("#still-loading").hide();
+            if (validImgs.length > 0) {
+                var sortedClasses = _(classes)
+                    .countBy()
+                    .map(function(count, cclass) {
+                        return {
+                            count: count,
+                            cclass: cclass
+                        }
+                    })
+                    .sortBy('count').reverse()
+                    .value();
+                var capped = _.take(sortedClasses, 10);
+                fillImgList(capped);
+            } else {
+                body.find(".yolo-content p.error").text("Unfortunately, there are no valid images that can be analyzed.").show();
+            }
+            console.log("%cobject detection", helper.clog.green, validImgs + " valid imgs", sortedClasses, capped);
+        });
+    });
+}
+
 var apis = {
     fired: {
+        // 1 = data is prepared, 2 = request fired/done
+        // goal = all are 2
         "alchemy": 0,
         "personality": 0,
         "applymagicsauce": 0
     },
     apiErrors: 0,
     apiDone: false,
-    msgContainer: $("#usage-message"),
     checkApisDone: function(msg) {
         if (msg === "error") {
             this.apiErrors++;
             if (this.apiErrors == 3) {
                 // if all APIs have error
-                this.msgContainer.html('<span class="warning">attention:</span> Server error, please refresh page.');
+                $("#server-err").show();
             }
         } else if (msg === "notenough") {
-            this.msgContainer.html('<span class="warning">attention:</span> Not enough data yet. There is not enough consumption. You need to scroll through your feed, consider typing more (e.g. commenting or private messages), so Data Selfie can make predictions. The more time you spend on Facebook the faster you will get your predictions.');
+            $("#not-enough").show();
         }
         var values = _.values(this.fired);
         console.log("APIs in progress", values, _.uniq(values));
+        // when all APIs fired status is 2
         if (_.uniq(values).length == 1 && _.uniq(values)[0] == 2) {
             this.apiErrors = 0;
             this.apiDone = true;
@@ -565,7 +693,7 @@ var apis = {
             loadPredictions("reveal");
         }
     },
-    postReq: function(endpoint, data) {
+    postReq: function(endpoint, data, callback) {
         var self = this;
         $.ajax({
                 method: "POST",
@@ -580,7 +708,6 @@ var apis = {
                         chrome.storage.local.set({
                             "alchemy": msg
                         }, function() {
-                            self.fired.alchemy = 2;
                             self.checkApisDone();
                         });
                         break;
@@ -588,7 +715,6 @@ var apis = {
                         chrome.storage.local.set({
                             "personality": msg
                         }, function() {
-                            self.fired.personality = 2;
                             self.checkApisDone();
                         });
                         break;
@@ -596,41 +722,53 @@ var apis = {
                         chrome.storage.local.set({
                             "applymagicsauce": msg
                         }, function() {
-                            self.fired.applymagicsauce = 2;
                             self.checkApisDone();
                         });
+                        break;
+                    case "yolo":
+                        callback(msg);
                         break;
                 }
             })
             .fail(function(jqXHR, textStatus, errorThrown) {
                 chrome.storage.local.get(endpoint, function(res) {
                     if (res[endpoint] == undefined) {
-                        var predContainer = body.find("." + endpoint + "-content"),
+                        var predContainer = body.find("." + endpoint + "-content p.error"),
                             statusInfo = (jqXHR.responseJSON) ? ": " + jqXHR.responseJSON.statusInfo : "",
                             language = (jqXHR.responseJSON) ? " " + jqXHR.responseJSON.language : "",
-                            html = '<p class="error">Sorry, there has been an error ';
+                            text = 'Sorry, there has been an server error ';
                         if (jqXHR.status == 413) {
                             statusInfo = ": Data too large. Please email support@dataselfie.it";
                         }
                         switch (endpoint) {
                             case "alchemy":
-                                html += '(' + jqXHR.status + helper.replaceAll(statusInfo, "-", " ") + language + ').';
+                                text += '(' + jqXHR.status + helper.replaceAll(statusInfo, "-", " ") + language + ').';
                                 break;
                             case "personality":
-                                html += '(' + jqXHR.status + helper.replaceAll(statusInfo, "-", " ") + ').';
+                                text += '(' + jqXHR.status + helper.replaceAll(statusInfo, "-", " ") + ').';
                                 break;
                             case "applymagicsauce":
-                                html += '(' + jqXHR.status + helper.replaceAll(statusInfo, "-", " ") + ').';
+                                text += '(' + jqXHR.status + helper.replaceAll(statusInfo, "-", " ") + ').';
+                                break;
+                            case "yolo":
+                                text += '(' + jqXHR.status + helper.replaceAll(statusInfo, "-", " ") + ').';
                                 break;
                         };
-                        predContainer.append(html + '</p>');
+                        predContainer.text(text).show();
                     }
                 });
-                self.checkApisDone("error");
+                if (endpoint !== "yolo") {
+                    self.checkApisDone("error");
+                } else {
+                    $("#still-loading").hide();
+                }
             })
             .always(function(jqXHR, textStatus) {
-                self.fired[endpoint] = 2;
-                console.log("API status", endpoint, jqXHR.status, textStatus);
+                if (endpoint !== "yolo") {
+                    self.fired[endpoint] = 2; // new request done
+                    console.log("API status", endpoint, jqXHR.status, textStatus);
+                    self.checkApisDone();
+                }
             });
     },
     newCall: function(key, newlength, callback) {
@@ -647,7 +785,7 @@ var apis = {
                 callback();
             } else {
                 console.log("No API call. Not enough new content.", key, diffLength, "<", threshold);
-                self.fired[key] = 2;
+                self.fired[key] = 2; // API done because no new request
                 self.checkApisDone("notenough");
             }
         });
@@ -749,6 +887,57 @@ var apis = {
             });
         });
     },
+    prepareYoloCall: function() {
+        var self = this;
+        $("#still-loading").show();
+        db.looked.toArray(function(arr) {
+            return _.filter(arr, function(o) {
+                return o.postImg !== undefined;
+            });
+        }).then(function(allImgPosts) {
+            var allImgUrls = _(allImgPosts)
+                .map('postImg')
+                .uniq()
+                .value();
+            console.log("%cimages from posts you looked at", helper.clog.green, allImgUrls);
+            $("#total-urls").text("(" + allImgUrls.length + " in total)");
+
+            var withoutPred = _(allImgPosts)
+                .filter(function(o) {
+                    return o.predImg === undefined;
+                })
+                .map('postImg')
+                .uniq()
+                .value();
+            if (withoutPred.length > 0) {
+                console.log("Yes API call. New image urls. yolo ", withoutPred.length)
+                self.newYoloCalls(withoutPred, withoutPred.length);
+            } else {
+                loadImgClassifications();
+            }
+        });
+    },
+    newYoloCalls: function(allUrls, index) {
+        var self = this;
+        var size = 50,
+            start = index,
+            end = _.max([(index - size), 0]);
+        self.postReq("yolo", { "urls": _.slice(allUrls, end, start) }, function(msg) {
+            for (var i = msg.predData.length - 1; i >= 0; i--) {
+                self.saveYoloPred(msg.predData[i].url, msg.predData[i])
+            }
+            if ((start - size) > 0) {
+                self.newYoloCalls(allUrls, start - size);
+            } else {
+                loadImgClassifications();
+            }
+        });
+    },
+    saveYoloPred: function(currentUrl, predImg) {
+        db.transaction("rw", db.looked, function() {
+            db.looked.where("postImg").equals(currentUrl).modify({ predImg: predImg });
+        });
+    },
     checkApplyMagicSaucePred: function() {
         chrome.storage.local.get("applymagicsauce", function(res) {
             if (res.applymagicsauce != undefined && res.applymagicsauce.predData.predictions == undefined) {
@@ -826,7 +1015,7 @@ var main = {
     getApiThreshold: function(callback) {
         $.ajax({
                 method: "GET",
-                url: apiUrl + "api/threshold",
+                url: apiUrl + "api/threshold"
             })
             .done(function(msg) {
                 apiThreshold = msg;
@@ -844,6 +1033,7 @@ var main = {
             console.log("%c[DB][<<] opened", helper.clog.magenta);
             main.userInfo();
             db.timespent.toArray(function(arr) {
+                // check if db has content
                 if (arr.length > 0) {
                     main.progressAnimation(true);
                     // just analyze and visualize
@@ -853,11 +1043,15 @@ var main = {
                     topList.likes();
                     // previously with status 204, empty data in local storage
                     apis.checkApplyMagicSaucePred();
+
                     // prepare data and check, if a call needs to be made
                     // FIX double console.log when new prediction for all 3
                     apis.prepareAlchemyCall();
                     apis.preparePersonalityCall();
                     apis.prepareApplyMagicSauceCall();
+
+                    // takes longer, independent from others
+                    apis.prepareYoloCall();
                 } else {
                     main.progressAnimation(false);
                 }
@@ -869,6 +1063,6 @@ var main = {
 $(document).ready(function() {
     main.getApiThreshold(main.initDB);
     console.log("Kaboom. Me page loaded.");
-    console.log("%cLegend: all related to looked", helper.clog.green);
-    console.log("%cLegend: all related to typed", helper.clog.yellow);
+    console.log("%cLegend: all related to your looked content is this color", helper.clog.green);
+    console.log("%cLegend: all related to your typed content is this color", helper.clog.yellow);
 });
