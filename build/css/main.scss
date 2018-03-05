@@ -63,6 +63,11 @@ p {
     padding: $baseU * 1 + px;
 }
 
+#fbshare, #twshare {
+    color: #FF00B1;
+    cursor: pointer;
+}
+
 #main {
     width: 100%;
     margin: 20px auto;

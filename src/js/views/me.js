@@ -535,6 +535,32 @@ var otherPredList = function(preds, interoprets) {
 
 }
 
+var constructSummary = function(a, b, c, d, e, f) {
+    var alist = [" a laid back", " an easily stressed"];
+    var blist = [", liberal", ", conservative", ", libertarian", ", not political"];
+    var clist = [" female", " male"];
+    var dlist = ["", " who doesn't eat out frequently", " who eats out frequently"];
+    var elist = ["", " doesn't prefer style when buying clothes", " prefers style when buying clothes"];
+    var flist = [" less satisfied in life than most", " more satisfied in life than most"];
+    var ibm = "";
+    var satisfied = flist[f];
+
+    if (d == 0 && e == 0) {
+        satisfied = " who is" + satisfied;
+    } else if (d == 0 && e != 0) {
+        ibm = " who" + elist[e];
+        satisfied = " and is" + satisfied;
+    } else if (d != 0 && e == 0) {
+        ibm = dlist[d];
+        satisfied = " and is" + satisfied;
+    } else { // d and e != 0
+        ibm = dlist[d] + " and" + elist[e];
+        satisfied = " and is" + satisfied;
+    }
+
+    return 'You\'re' + alist[a] + blist[b] + clist[c] + ibm + satisfied + '';
+}
+
 var loadPredictions = function(key) {
     var noPrediction = function(name) {
         $("#" + name + "-container .content")
@@ -599,6 +625,59 @@ var loadPredictions = function(key) {
                     $("#the-cool-stuff").animate({ opacity: 1 }, 500);
                     $("#usage-message").delay(200).hide();
                     $("#the-good-stuff").delay(200).css('position', 'relative').animate({ opacity: 1 }, 200);
+                    if (res.applymagicsauce) {
+                        var amspreds = res.applymagicsauce.predData.predictions;
+                        var politics = _.chain(amspreds)
+                            .filter(function(n) { return n.trait.indexOf("Politics") > -1; })
+                            .sortBy('value')
+                            .reverse()
+                            .value()[0].trait.toLowerCase();
+                        if (politics.indexOf("liberal") > -1) {
+                            var politcsIndex = 0;
+                        } else if (politics.indexOf("conservative") > -1) {
+                            var politcsIndex = 1;
+                        } else if (politics.indexOf("libertanian") > -1) {
+                            var politcsIndex = 2;
+                        } else {
+                            var politcsIndex = 3;
+                        }
+                    }
+
+                    if (res.personality) {
+                        var shop = res.personality.predData.consumption_preferences[0].consumption_preferences;
+                        var style = _.filter(shop, function(n) { return n.consumption_preference_id.indexOf("consumption_preferences_clothes_style") > -1; });
+                        var health = res.personality.predData.consumption_preferences[1].consumption_preferences;
+                        var eat = _.filter(health, function(n) { return n.consumption_preference_id.indexOf("consumption_preferences_eat_out") > -1; });
+                        // 1 is not likely, 2 is likely in share array
+                        var styleScore = style[0].score + 1;
+                        var eatScore = eat[0].score + 1;
+                    } else {
+                        var styleScore = 0;
+                        var eatScore = 0;
+                    }
+
+                    var a = amspreds[28].value < 0.5 ? 0 : 1, // BIG5_Neuroticism
+                        b = politcsIndex,
+                        c = amspreds[25].value < 0.5 ? 1 : 0, // Female
+                        d = styleScore,
+                        e = eatScore,
+                        f = amspreds[33].value < 0.5 ? 0 : 1; // Satisfaction_Life
+                    var seq = "a" + a + "b" + b + "c" + c + "d" + d + "e" + e + "f" + f;
+                    console.log(amspreds[28], politics, amspreds[25], style, eat, amspreds[33], seq);
+                    var sentence = constructSummary(a, b, c, d, e, f);
+                    var sentenceArr = sentence.split(" ");
+                    sentenceArr.splice(15, 0, "_______________");
+                    $("#summary-text").text(sentenceArr.join(" "));
+
+                    var initFBDone = false;
+                    var fburl = 'https://dataselfie.it/my/' + seq + '?share';
+                    var twurl = 'https://twitter.com/intent/tweet?text="' + sentence + '"&via=dataselfie&url=https://dataselfie.it';
+                    $("#fbshare").attr("href", fburl);
+                    $("#twshare").attr("href", twurl);
+
+                    $("#summary-text-row").fadeIn();
+                    $("#social-share").fadeIn();
+
                 } else {
                     $("#usage-message").delay(200).show();
                 }
