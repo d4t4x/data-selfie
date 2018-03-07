@@ -665,9 +665,7 @@ var loadPredictions = function(key) {
                     var seq = "a" + a + "b" + b + "c" + c + "d" + d + "e" + e + "f" + f;
                     console.log(amspreds[28], politics, amspreds[25], style, eat, amspreds[33], seq);
                     var sentence = constructSummary(a, b, c, d, e, f);
-                    var sentenceArr = sentence.split(" ");
-                    sentenceArr.splice(15, 0, "_______________");
-                    $("#summary-text").text(sentenceArr.join(" "));
+                    $("#summary-text").text(sentence);
 
                     var initFBDone = false;
                     var fburl = 'https://dataselfie.it/my/' + seq + '?share';
@@ -1054,8 +1052,8 @@ var main = {
         });
         chrome.storage.local.get("dsUser", function(res) {
             if (res.dsUser) {
-                $("#status img").attr("src", res.dsUser.profilePic.dataUri);
-                $("#user a").attr("href", res.dsUser.profileLink).text(res.dsUser.userName);
+                $("#status img").first().attr("src", res.dsUser.profilePic.dataUri);
+                $("#user a").first().attr("href", res.dsUser.profileLink).text(res.dsUser.userName);
             }
         });
     },

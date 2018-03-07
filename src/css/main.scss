@@ -59,8 +59,19 @@ p {
 }
 
 #user {
-    width: 60vw;
+    width: 80vw;
+    max-width: 760px;
     padding: $baseU * 1 + px;
+    .info-row div{
+        display: inline-block;
+    }
+    .info-label {
+        vertical-align: top;
+        width: 110px;
+    }
+    .info-content {
+        width: calc(100% - 120px);
+    }
 }
 
 #fbshare, #twshare {

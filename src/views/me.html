@@ -14,18 +14,22 @@
 <body>
     <header id="user">
         <div class="info">
-            <p>$ Data Selfie _
-                <a href="">_</a>
-            </p>
-            <p id="summary-text-row" style="display: none">$ Summary _____ <span id="summary-text">_</span> </p>
-            <p id="social-share" style="display: none"><span style="color: #000">_______________</span> <a href="" target="_blank" id="fbshare">Share via Facebook</a> or <a href="" target="_blank" id="twshare">Twitter</a></p>
-            <p>$ Online ______ <span id="last-session">_</span></p>
-            <p>$ Total _______ <span id="total-time-spent">_</span></p>
-            <div id="legend">$ Legend ______
-                <div class="looked-text tool-tip" data-tooltip="content from your newsfeed that you look at (e.g. >5sec, see options)">looked</div> _
-                <div class="clicked-like-text tool-tip" data-tooltip="posts you liked from your newsfeed">liked</div> _
-                <div class="clicked-external-text tool-tip" data-tooltip="links you clicked from your newsfeed">link clicked</div> _
-                <div class="typed-text tool-tip" data-tooltip="anything you typed e.g. comments, private messages etc.">typed</div>
+            <div>$ Data Selfie _ <a href="">_</a></div>
+            <div id="summary-text-row" class="info-row" style="display: none">
+                <div class="info-label">$ Summary _____ </div>
+                <div class="info-content"><span id="summary-text">_</span></div>
+            </div>
+            <div id="social-share" style="display: none"><span style="color: #000">_______________</span> <a href="" target="_blank" id="fbshare">Share via Facebook</a> or <a href="" target="_blank" id="twshare">Twitter</a></div>
+            <div>$ Online ______ <span id="last-session">_</span></div>
+            <div>$ Total _______ <span id="total-time-spent">_</span></div>
+            <div id="legend" class="info-row">
+                <div class="info-label">$ Legend ______</div>
+                <div class="info-content">
+                    <div class="looked-text tool-tip" data-tooltip="content from your newsfeed that you look at (e.g. >5sec, see options)">looked</div> _
+                    <div class="clicked-like-text tool-tip" data-tooltip="posts you liked from your newsfeed">liked</div> _
+                    <div class="clicked-external-text tool-tip" data-tooltip="links you clicked from your newsfeed">link clicked</div> _
+                    <div class="typed-text tool-tip" data-tooltip="anything you typed e.g. comments, private messages etc.">typed</div>
+                </div>
             </div>
         </div>
         <div id="status">
@@ -150,8 +154,7 @@
                         <div class="container-title">Personality Prediction</div>
                         <div class="tech-label" data-tooltip="Machine Learning from IBM and the University of Cambridge was used to generate this analysis.">ML</div>
                         <div class="content applymagicsauce-content" id="">
-                            <p>What you type and the facebook pages you see in your feed result in this prediction of your Big 5,
-                            E.g. 20th percentile means 20% of general population has lower and 80% has higher score</p>
+                            <p>What you type and the facebook pages you see in your feed result in this prediction of your Big 5, E.g. 20th percentile means 20% of general population has lower and 80% has higher score</p>
                             <p class="error"></p>
                             <div id="ocean-vis"></div>
                             <p class="last-updated applymagicsauce-last">updated: <span>- (not enough data)</span></p>
@@ -165,8 +168,7 @@
                         <div class="container-title">Religious Orientation</div>
                         <div class="tech-label" data-tooltip="Machine Learning API from the University of Cambridge was used to generate this analysis.">ML</div>
                         <div class="content applymagicsauce-content" id="">
-                            <p style="min-height: 50px;">The pages you see in your feed suggest this,
-                                "None" includes atheists, agnostics, pastafarians and jedi. "Christian Other" includes several christian denominations</p>
+                            <p style="min-height: 50px;">The pages you see in your feed suggest this, "None" includes atheists, agnostics, pastafarians and jedi. "Christian Other" includes several christian denominations</p>
                             <p class="error"></p>
                             <ul id="religion-chart"></ul>
                             <p class="last-updated applymagicsauce-last">updated: <span>- (not enough data)</span></p>
@@ -190,8 +192,7 @@
                         <div class="container-title">Other Predictions</div>
                         <div class="tech-label" data-tooltip="Machine Learning API from the University of Cambridge was used to generate this analysis.">ML</div>
                         <div class="content applymagicsauce-content" id="">
-                            <p>Based on pages in your feed,
-                            the percentile is in relation to the general population</p>
+                            <p>Based on pages in your feed, the percentile is in relation to the general population</p>
                             <p class="error"></p>
                             <div class="Rtable Rtable--2cols-m"></div>
                             <p class="last-updated applymagicsauce-last">updated: <span>- (not enough data)</span></p>
