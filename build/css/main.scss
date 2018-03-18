@@ -280,6 +280,7 @@ footer {
         }
         .content {
             padding: $baseU + px;
+            padding-top: 15px;
             line-height: 1.3em;
             overflow: scroll;
             p {
@@ -334,7 +335,7 @@ footer {
                 flex-grow: 1;
                 width: 100%; // Default to full width
                 overflow: hidden; // Or flex might break
-                padding: 0 0 8px 0;
+                padding: 0 0 15px 0;
                 list-style: none;
                 overflow-wrap: break-word;
             }

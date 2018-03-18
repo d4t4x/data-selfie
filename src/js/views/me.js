@@ -275,22 +275,27 @@ var nlpList = {
     list: function(data, name) {
         $("#" + name + "-container .Rtable").empty();
         _.each(_.take(data, 10), function(item) {
+            var categoriesArr = item.label.split("/");
             $("#" + name + "-container .Rtable")
-                .append($("<div>", { class: "cell looked-text" }).text(_.round(item.relevance, 2)))
-                .append($("<div>", { class: "cell" }).text(item.text));
+                .append($("<div>", { class: "cell looked-text" }).text(_.round(item.score, 2)))
+                .append($("<div>", { class: "cell" }).text(categoriesArr[1] + " /") // because [0] = ""
+                    .append($("<p>").text(_.takeRight(categoriesArr, categoriesArr.length-2).join(" / ")))
+                );
         });
     },
     sentList: function(data, name) {
         $("#" + name + "-container .Rtable").empty();
         _.each(_.take(data, 10), function(item) {
             var sentScore = (item.sentiment) ? _.round(item.sentiment.score, 2) : "&#177;0.00",
-                type = (item.sentiment) ? item.sentiment.type : "";
+                label = (item.sentiment) ? item.sentiment.label : "";
             sentScore = (item.sentiment > 0) ? "+" + sentScore : sentScore;
             $("#" + name + "-container .Rtable")
                 .append($("<div>", { class: "cell looked-text" }).text(_.round(item.relevance, 2)))
                 .append($("<div>", { class: "cell" }).text(sentScore))
-                .append($("<div>", { class: "cell" }).text(type))
-                .append($("<div>", { class: "cell" }).text(item.text));
+                .append($("<div>", { class: "cell" }).text(label))
+                .append($("<div>", { class: "cell" }).text(item.text + " ")
+                    .append($("<span>").text("(" + item.type + ")").css("color", "#999"))
+                );
         });
     },
 }
@@ -569,23 +574,18 @@ var loadPredictions = function(key) {
                 .css("display", "block"));
     }
     chrome.storage.local.get(null, function(res) {
-        if (res.alchemy && key == "alchemy") {
-            body.find(".alchemy-last span").text(moment(res.alchemy.lastUpdated).format("MMM-DD-YY"));
-            console.log("%cAlchemy Language processing", helper.clog.green, res.alchemy);
-            if (res.alchemy.predData.concepts.length > 0) {
-                nlpList.list(res.alchemy.predData.concepts, "concepts");
+        if (res.alchemy2 && key == "alchemy2") {
+            body.find(".alchemy-last span").text(moment(res.alchemy2.lastUpdated).format("MMM-DD-YY"));
+            console.log("%cAlchemy Language processing", helper.clog.green, res.alchemy2);
+            if (res.alchemy2.predData.categories.length > 0) {
+                nlpList.list(res.alchemy2.predData.categories, "categories");
             } else {
-                noPrediction("concepts");
+                noPrediction("categories");
             };
-            if (res.alchemy.predData.entities.length > 0) {
-                nlpList.sentList(res.alchemy.predData.entities, "entities");
+            if (res.alchemy2.predData.entities.length > 0) {
+                nlpList.sentList(res.alchemy2.predData.entities, "entities");
             } else {
                 noPrediction("entities");
-            }
-            if (res.alchemy.predData.keywords.length > 0) {
-                nlpList.sentList(res.alchemy.predData.keywords, "keywords");
-            } else {
-                noPrediction("keywords");
             }
         }
 
@@ -621,7 +621,7 @@ var loadPredictions = function(key) {
         if (key == "reveal") {
             $("#loading").delay(2000).hide(function() {
                 // have any kind of prediction!
-                if (res.applymagicsauce || res.personality || res.alchemy) {
+                if (res.applymagicsauce || res.personality || res.alchemy2) {
                     $("#the-cool-stuff").animate({ opacity: 1 }, 500);
                     $("#usage-message").delay(200).hide();
                     $("#the-good-stuff").delay(200).css('position', 'relative').animate({ opacity: 1 }, 200);
@@ -747,7 +747,7 @@ var apis = {
     fired: {
         // 1 = data is prepared, 2 = request fired/done
         // goal = all are 2
-        "alchemy": 0,
+        "alchemy2": 0,
         "personality": 0,
         "applymagicsauce": 0
     },
@@ -769,7 +769,7 @@ var apis = {
         if (_.uniq(values).length == 1 && _.uniq(values)[0] == 2) {
             this.apiErrors = 0;
             this.apiDone = true;
-            loadPredictions("alchemy");
+            loadPredictions("alchemy2");
             loadPredictions("personality");
             loadPredictions("applymagicsauce");
             loadPredictions("reveal");
@@ -786,9 +786,9 @@ var apis = {
             .done(function(msg, obj) {
                 console.log("API response", endpoint, msg);
                 switch (endpoint) {
-                    case "alchemy":
+                    case "alchemy2":
                         chrome.storage.local.set({
-                            "alchemy": msg
+                            "alchemy2": msg
                         }, function() {
                             self.checkApisDone();
                         });
@@ -823,7 +823,7 @@ var apis = {
                             statusInfo = ": Data too large. Please email support@dataselfie.it";
                         }
                         switch (endpoint) {
-                            case "alchemy":
+                            case "alchemy2":
                                 text += '(' + jqXHR.status + helper.replaceAll(statusInfo, "-", " ") + language + ').';
                                 break;
                             case "personality":
@@ -900,11 +900,12 @@ var apis = {
         }).then(function() {
             cleanDesc = helper.replaceAll(desc, " $+-+$ ", " ");
             origLen = cleanDesc.split(" ").length;
+            // loop to limit to 10K chars max
             var lessText = function() {
                 truncDesc = self.truncate(desc, arrLength);
-                truncSize = helper.getByteSize(truncDesc);
-                if (truncSize > 80000) {
-                    arrLength -= 10;
+                truncSize = truncDesc.length;
+                if (truncSize > 10000) {
+                    arrLength -= 1;
                     lessText();
                 } else {
                     return;
@@ -912,13 +913,13 @@ var apis = {
             };
             lessText();
         }).finally(function() {
-            console.log("%clooked descriptions", helper.clog.green, truncSize, "bytes,", truncDesc.split(" ").length, "words sent of total", origLen, "words\n", cleanDesc);
+            console.log("%clooked descriptions", helper.clog.green, truncSize, "characters,", truncDesc.split(" ").length, "words sent of total", desc.length, "characters", origLen, "words\n", cleanDesc);
             // sending over the original length
             // but make prediction based on truncated/most recent data
-            self.newCall("alchemy", origLen, function() {
-                self.fired.alchemy = 1;
+            self.newCall("alchemy2", origLen, function() {
+                self.fired.alchemy2 = 1;
                 var escapedDesc = truncDesc.replace(/"/g, '\\"');
-                self.postReq("alchemy", { "desc": escapedDesc, "length": origLen });
+                self.postReq("alchemy2", { "desc": escapedDesc, "length": origLen });
             });
 
         });
@@ -936,7 +937,7 @@ var apis = {
         }).then(function(typed) {
             cleanTyped = helper.replaceAll(typed, " $+-+$ ", " ");
             origLen = cleanTyped.split(" ").length;
-            console.log(self.truncate(typed, arrLength));
+            // loop to limit byte size of 80K
             var lessText = function() {
                 truncTyped = self.truncate(typed, arrLength);
                 truncSize = helper.getByteSize(truncTyped);
