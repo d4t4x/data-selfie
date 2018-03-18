@@ -626,6 +626,19 @@ var loadPredictions = function(key) {
                     $("#usage-message").delay(200).hide();
                     $("#the-good-stuff").delay(200).css('position', 'relative').animate({ opacity: 1 }, 200);
                     if (res.applymagicsauce) {
+                        if (res.personality) {
+                            var shop = res.personality.predData.consumption_preferences[0].consumption_preferences;
+                            var style = _.filter(shop, function(n) { return n.consumption_preference_id.indexOf("consumption_preferences_clothes_style") > -1; });
+                            var health = res.personality.predData.consumption_preferences[1].consumption_preferences;
+                            var eat = _.filter(health, function(n) { return n.consumption_preference_id.indexOf("consumption_preferences_eat_out") > -1; });
+                            // 1 is not likely, 2 is likely in share array
+                            var styleScore = style[0].score + 1;
+                            var eatScore = eat[0].score + 1;
+                        } else {
+                            var styleScore = 0;
+                            var eatScore = 0;
+                        }
+
                         var amspreds = res.applymagicsauce.predData.predictions;
                         var politics = _.chain(amspreds)
                             .filter(function(n) { return n.trait.indexOf("Politics") > -1; })
@@ -641,40 +654,31 @@ var loadPredictions = function(key) {
                         } else {
                             var politcsIndex = 3;
                         }
+
+                        var neurotI = _.find(amspreds, function(o) { return o.trait == 'BIG5_Neuroticism'; }),
+                            genderI = _.find(amspreds, function(o) { return o.trait == 'Female'; }),
+                            satisI = _.find(amspreds, function(o) { return o.trait == 'Satisfaction_Life'; });
+
+                        var a = neurotI.value < 0.5 ? 0 : 1,
+                            b = politcsIndex,
+                            c = genderI.value < 0.5 ? 1 : 0,
+                            d = styleScore,
+                            e = eatScore,
+                            f = satisI.value < 0.5 ? 0 : 1;
+                        var seq = "a" + a + "b" + b + "c" + c + "d" + d + "e" + e + "f" + f;
+                        console.log(neurotI, politics, genderI, style[0], eat[0], satisI, seq);
+                        var sentence = constructSummary(a, b, c, d, e, f);
+                        $("#summary-text").text(sentence);
+
+                        var initFBDone = false;
+                        var fburl = 'https://dataselfie.it/my/' + seq + '?share';
+                        var twurl = 'https://twitter.com/intent/tweet?text="' + sentence + '"&via=dataselfie&url=https://dataselfie.it';
+                        $("#fbshare").attr("href", fburl);
+                        $("#twshare").attr("href", twurl);
+
+                        $("#summary-text-row").fadeIn();
+                        $("#social-share").fadeIn();
                     }
-
-                    if (res.personality) {
-                        var shop = res.personality.predData.consumption_preferences[0].consumption_preferences;
-                        var style = _.filter(shop, function(n) { return n.consumption_preference_id.indexOf("consumption_preferences_clothes_style") > -1; });
-                        var health = res.personality.predData.consumption_preferences[1].consumption_preferences;
-                        var eat = _.filter(health, function(n) { return n.consumption_preference_id.indexOf("consumption_preferences_eat_out") > -1; });
-                        // 1 is not likely, 2 is likely in share array
-                        var styleScore = style[0].score + 1;
-                        var eatScore = eat[0].score + 1;
-                    } else {
-                        var styleScore = 0;
-                        var eatScore = 0;
-                    }
-
-                    var a = amspreds[28].value < 0.5 ? 0 : 1, // BIG5_Neuroticism
-                        b = politcsIndex,
-                        c = amspreds[25].value < 0.5 ? 1 : 0, // Female
-                        d = styleScore,
-                        e = eatScore,
-                        f = amspreds[33].value < 0.5 ? 0 : 1; // Satisfaction_Life
-                    var seq = "a" + a + "b" + b + "c" + c + "d" + d + "e" + e + "f" + f;
-                    console.log(amspreds[28], politics, amspreds[25], style, eat, amspreds[33], seq);
-                    var sentence = constructSummary(a, b, c, d, e, f);
-                    $("#summary-text").text(sentence);
-
-                    var initFBDone = false;
-                    var fburl = 'https://dataselfie.it/my/' + seq + '?share';
-                    var twurl = 'https://twitter.com/intent/tweet?text="' + sentence + '"&via=dataselfie&url=https://dataselfie.it';
-                    $("#fbshare").attr("href", fburl);
-                    $("#twshare").attr("href", twurl);
-
-                    $("#summary-text-row").fadeIn();
-                    $("#social-share").fadeIn();
 
                 } else {
                     $("#usage-message").delay(200).show();
@@ -844,7 +848,8 @@ var apis = {
             .always(function(jqXHR, textStatus) {
                 if (endpoint !== "yolo") {
                     self.fired[endpoint] = 2; // new request done
-                    console.log("API status", endpoint, jqXHR.status, textStatus);
+                    var reqStatus = jqXHR ? jqXHR.status : jqXHR;
+                    console.log("API status", endpoint, reqStatus, textStatus);
                     self.checkApisDone();
                 }
             });
@@ -912,7 +917,8 @@ var apis = {
             // but make prediction based on truncated/most recent data
             self.newCall("alchemy", origLen, function() {
                 self.fired.alchemy = 1;
-                self.postReq("alchemy", { "desc": truncDesc, "length": origLen });
+                var escapedDesc = truncDesc.replace(/"/g, '\\"');
+                self.postReq("alchemy", { "desc": escapedDesc, "length": origLen });
             });
 
         });
@@ -947,7 +953,8 @@ var apis = {
             console.log("%ctyped content", helper.clog.yellow, truncSize, "bytes,", truncTyped.split(" ").length, "words sent of total", origLen, "words\n", cleanTyped);
             self.newCall("personality", origLen, function() {
                 self.fired.personality = 1;
-                self.postReq("personality", { "typed": truncTyped, "length": origLen });
+                var escapedTyped = truncTyped.replace(/"/g, '\\"');
+                self.postReq("personality", { "typed": escapedTyped, "length": origLen });
             });
         });
     },

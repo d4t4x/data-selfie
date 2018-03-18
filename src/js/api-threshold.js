@@ -1,5 +1,5 @@
 module.exports = {
-    "alchemy": 400,
+    "alchemy": 2000,
     "personality": 200,
     "applymagicsauce": 15,
     "alchemyMax": 300,
