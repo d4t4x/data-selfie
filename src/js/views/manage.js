@@ -1,8 +1,8 @@
-var Filesaver = require('../libs/filesaver.js'),
-    $data = $("#data"),
+var $data = $("#data"),
     $status = $("#status p"),
     db,
-    localData;
+    localData,
+    predData;
 
 function openData() {
     db = new Dexie("DataSelfieLocalDB");
@@ -69,20 +69,22 @@ function readSingleFile(e) {
     reader.readAsText(file);
 }
 
-function downloadData() {
-    var name = "dataselfie_" + moment().format('YYYY-MM-DD') + ".json",
-        blob = new Blob([localData], { type: "text/json" });
-    Filesaver.saveAs(blob, name);
-}
-
 function start() {
     openData();
     $("button").click(function(e) {
         $status.text("");
         switch (e.target.id) {
             case "backup":
-                getData();
-                downloadData();
+                chrome.runtime.sendMessage({
+                    type: "backup",
+                    data: []
+                });
+                break;
+            case "pred-backup":
+                chrome.runtime.sendMessage({
+                    type: "pred-backup",
+                    data: []
+                });
                 break;
             case "import":
                 $("#choose-file").click();
@@ -105,6 +107,5 @@ function start() {
     });
     $("#choose-file").change(readSingleFile);
 }
-
 
 start();

@@ -59,12 +59,13 @@
     p {
         padding: 0;
         margin: 5px 0;
+        width: 60vw;
+        max-width: 600px;
     }
 
-    #status p{
+    #status p {
         color: #19E8FF;
     }
-
     </style>
 </head>
 
@@ -74,24 +75,30 @@
         <p></p>
     </div>
     <div id="actions">
-        <a href="">Import Data</a>
+        <a href="">Import Consumption Data</a>
         <br>
         <input style="display:none;" type="file" id="choose-file" />
-        <p>// e.g. if you have used Data Selfie in a different browser or computer before</p>
+        <p>// e.g. if you have used Data Selfie in a different browser or computer before and exported the data from there as a json file</p>
         <button id="import">Import</button>
         <br>
-        <a href="">Export Your Data</a>
+        <a href="">Export Your Consumption Data</a>
         <br>
-        <p>// download your data as a json file</p>
+        <p>// download the data of your consumption (looked at, typed, clicked, liked content) like you see in the box above as a json file</p>
         <button id="backup">Export</button>
         <br>
-        <a href="">Delete Your Data</a>
+        <a href="">Save Your User/Prediction Data</a>
         <br>
-        <p>// remove any records from Data Selfie from your computer, this is final, there is no other place your data is stored</p>
+        <p>// download data like e.g. your personality prediction, health and shopping preferences (this includes more predictions then are shown in "Your Data Selfie") as a json file</p>
+        <button id="pred-backup">Save</button>
+        <br>
+        <a href="">Delete All Your Data</a>
+        <br>
+        <p>// remove any records from Data Selfie from your computer, i.e. consumption and prediction data; this is final, there is no other place your data is stored</p>
         <button id="delete">Delete</button>
         <br>
-        <script src="../js/manage.js"></script>
     </div>
+    <div id="pred-data"></div>
+    <script src="../js/manage.js"></script>
 </body>
 
 </html>

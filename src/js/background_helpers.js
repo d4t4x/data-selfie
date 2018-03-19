@@ -30,32 +30,40 @@ module.exports = {
     downloadBar: function() {
         setTimeout(function() {
             chrome.downloads.erase({ "state": "complete" });
-        }, 100);
+        }, 5000);
     },
-    saveBackup: function(data) {
+    saveBackup: function(data, name) {
         console.log("[DB][<<] backup", data);
+        var blob = new Blob([JSON.stringify(data, null, 2)], { type: "text/json;charset=utf-8" })
         chrome.downloads.download({
-            url: "data:text/json," + JSON.stringify(data, null, 2),
-            filename: "./dataselfie_" + moment().format('YYYY-MM-DD') + ".json",
+            url: URL.createObjectURL(blob),
+            filename: "dataselfie_" + name + "_" + moment().format('YYYY-MM-DD') + ".json",
             conflictAction: "overwrite", // "uniquify" / "overwrite" / "prompt"
-            saveAs: false // true gives save-as dialogue
+            saveAs: true // true gives save-as dialogue
         }, this.downloadBar());
     },
     backup: function(_db) {
-        // FIX downloads permission might not be needed anymore, now in Manage Your Data page
-        var obj = { dataselfie: {} };
         var self = this;
-        _db.transaction('r', _db.tables, function() {
-            _db.tables.forEach(function(table) {
-                table.toArray().then(function(sessions) {
-                    obj.dataselfie[table.name] = sessions;
-                });
-            })
-        }).then(function() {
-            self.saveBackup(obj);
-        }).catch(function(err) {
-            console.error(err.stack);
-        });
+        if (_db != undefined) {
+            var obj = { dataselfieconsumption: {} };
+            _db.transaction('r', _db.tables, function() {
+                _db.tables.forEach(function(table) {
+                    table.toArray().then(function(sessions) {
+                        obj.dataselfieconsumption[table.name] = sessions;
+                    });
+                })
+            }).then(function() {
+                self.saveBackup(obj, "consumption");
+            }).catch(function(err) {
+                console.error(err.stack);
+            });
+        } else {
+            var obj = { dataselfieprediction: {} };
+            chrome.storage.local.get(function(data) {
+                obj.dataselfieprediction = data;
+                self.saveBackup(obj, "prediction");
+            });
+        }
     },
     importError: function(tabid) {
         console.log("%c[DB][<<] import (json) error", clog.magenta);

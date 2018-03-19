@@ -1,6 +1,6 @@
 {
     "name": "Data Selfie",
-    "version": "0.1.0",
+    "version": "0.1.1",
     "description": "Collect and analyze data from your interactions on facebook.com.",
     "background": {
         "scripts": ["js/background.js"]
