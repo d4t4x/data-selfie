@@ -87,3 +87,12 @@ This project is maintained by one developer (Hang aka 01fade) as of now. Email h
 Last tested with:
 - Chrome Version 61.0.3163.100 (64-bit) with macOS High Sierra 10.13 with Facebook in English (US)
 - Firefox Nightly 58 with macOS High Sierra 10.13 with Facebook in English (US)
+
+
+#### License
+
+Data Selfie is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or any later version.
+
+Data Selfie is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+
+For more info see <http://www.gnu.org/licenses/>.
