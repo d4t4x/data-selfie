@@ -62,7 +62,7 @@ p {
     width: 80vw;
     max-width: 760px;
     padding: $baseU * 1 + px;
-    .info-row div{
+    .info-row div {
         display: inline-block;
     }
     .info-label {
@@ -74,7 +74,8 @@ p {
     }
 }
 
-#fbshare, #twshare {
+#fbshare,
+#twshare {
     color: #FF00B1;
     cursor: pointer;
 }
@@ -152,6 +153,32 @@ footer {
 
 #the-good-stuff {
     position: fixed;
+}
+
+#the-cool-stuff {
+    input {
+        width: 40px;
+        text-align: center;
+        border: 0;
+    }
+    #shift-time {
+        position: absolute;
+        bottom: 10px;
+        div {
+            display: inline-block;
+            background-color: $b;
+            color: $w;
+            border: 1px solid $w;
+            padding: 0px 5px;
+            height: 1.2em;
+            &:hover {
+                cursor: pointer;
+            }
+            &:focus {
+                outline: 0;
+            }
+        }
+    }
 }
 
 #progressAnim {

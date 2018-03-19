@@ -31,16 +31,18 @@ var activity = {
     w: $("#consumption-vis").width() - 10, // for padding
     h: 0,
     pad: 20,
-    lpad: 90,
+    lpad: 120,
+    bpad: 0,
     timespan: 7, // how many days for chart
-    elSize: 8,
+    dayChange: 0,
+    elSize: 10,
     svg: undefined,
     yScale: undefined,
     xScale: undefined,
     tooltip: undefined,
     plot: function() {
         var self = this;
-        this.h = this.elSize * 5 * this.timespan;
+        this.h = this.elSize * 5 * this.timespan + this.bpad;
 
         this.svg = d3.select("#consumption-vis")
             .append("svg")
@@ -48,7 +50,7 @@ var activity = {
             .attr("height", this.h);
 
         this.xScale = d3.scaleLinear().domain([0, 24])
-            .range([this.lpad - this.pad + 5, this.w]); // need w minus for last label
+            .range([this.lpad - this.pad + 10, this.w]); // need w minus for last label
 
         var xAxis = d3.axisBottom(this.xScale)
             .ticks(24)
@@ -66,30 +68,40 @@ var activity = {
             .tickSize(6);
 
         this.svg.append("g")
-            .attr("class", "axis")
-            .attr("transform", "translate(0, " + (this.h - this.pad) + ")")
+            .attr("class", "x axis")
+            .attr("transform", "translate(0, " + (this.h - this.pad + this.bpad) + ")")
             .call(xAxis);
 
-        var mindate = moment().subtract(this.timespan, "days").startOf('day').toDate(),
-            // add 1 more day to have a space buffer for showing data
-            maxdate = moment().add(1, "days").startOf('day').toDate();
+        this.getMinDate = function() {
+            return moment().subtract(self.dayChange + self.timespan, "days").startOf('day').toDate();
+        }
+
+        this.getMaxDate = function(real) {
+            // hack: add day to have a space buffer for showing data
+            return moment().subtract(self.dayChange, "days").add(1, "days").startOf('day').toDate();
+        }
+
+        var mindate = this.getMinDate(),
+            maxdate = this.getMaxDate();
 
         this.yScale = d3.scaleTime().domain([mindate, maxdate]).range([this.pad, this.h - this.pad]);
 
+        var weekday = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
         var yAxis = d3.axisLeft(this.yScale)
             .ticks(this.timespan)
             .tickFormat(function(d, i) {
                 if (i == self.timespan + 1) {
                     return "";
                 } else {
-                    return moment(d).format("MMM-DD-YY");
+                    var day = weekday[moment(d).day()];
+                    return moment(d).format("MMM-DD-YY") + ", " + day + " ";
                 }
             })
             .tickSize(0)
             .tickPadding(6);
 
         this.svg.append("g")
-            .attr("class", "axis")
+            .attr("class", "y axis")
             .attr("transform", "translate(" + (this.lpad - this.pad) + ", 0)")
             .call(yAxis);
 
@@ -103,34 +115,68 @@ var activity = {
                 .attr("y2", this.yScale(moment().subtract(i, "days").startOf('day').toDate()));
         }
 
-        function timeDiff(item) {
-            var a = moment().startOf('day'),
-                b = moment(item.timestamp);
-            return a.diff(b, "days", true) <= self.timespan;
-        };
-
         this.tooltip = d3.select("#consumption-vis").append("div")
             .attr("class", "tooltip")
             .style("opacity", 0);
 
-        db.looked.filter(timeDiff).toArray(function(lookedArr) {
-            self.addPoints("elLooked", lookedArr, "#00FF80", "", 0);
+        function populateData() {
+            function timeDiff(item) {
+                var a = moment(self.getMaxDate()),
+                    b = moment(self.getMinDate()),
+                    dString = moment.parseZone(item.timestamp).format("MMM-DD-YY hh:mm:sa"),
+                    betw = moment(dString, "MMM-DD-YY hh:mm:sa").isBetween(b, a, null, []);
+                // diff should be positive and max the timespan to show in graph
+                return betw;
+            };
+
+            db.looked.filter(timeDiff).toArray(function(lookedArr) {
+                self.addPoints("elLooked", lookedArr, "#00FF80", "", 0);
+            });
+            db.clicked.filter(timeDiff).toArray(function(clickedArr) {
+                self.addPoints("elClicked", clickedArr, "#0080FF", "#19E8FF", 1);
+            });
+            db.typed.filter(timeDiff).toArray(function(typedArr) {
+                self.addPoints("elTyped", typedArr, "#FFFF00", "", 2);
+            });
+        }
+
+        this.pointG = this.svg.append("g");
+        populateData();
+
+        function update(change) {
+            var days = Math.abs($("#days-increment").val());
+            if (change === "prev-day") {
+                self.dayChange += days;
+            } else {
+                self.dayChange -= days;
+            }
+            var mindate = self.getMinDate(),
+                maxdate = self.getMaxDate();
+            self.yScale.domain([mindate, maxdate]);
+            self.svg.select(".y").call(yAxis);
+
+            populateData();
+        }
+
+        $(".update-activity").click(function(e) {
+            update(e.target.id);
         });
-        db.clicked.filter(timeDiff).toArray(function(clickedArr) {
-            self.addPoints("elClicked", clickedArr, "#0080FF", "#19E8FF", 1);
-        });
-        db.typed.filter(timeDiff).toArray(function(typedArr) {
-            self.addPoints("elTyped", typedArr, "#FFFF00", "", 2);
-        });
+
+        $("#days-increment").change(function(e) {
+            if (e.target.value < 1) {
+                e.target.value = 1;
+            }
+        })
 
     },
     addPoints: function(classname, array, color1, color2, order) {
-        var class_selector = "." + classname
-        self = this;
-        this.svg.append("g").selectAll(class_selector)
-            .data(array)
-            .enter()
+        var class_selector = "." + classname,
+            self = this;
+        var points = this.pointG.selectAll(class_selector).data(array);
+        points.exit().remove();
+        points.enter()
             .append("path")
+            .merge(points)
             .attr("class", classname)
             .attr("d", function(d, i) {
                 var size = self.elSize,
@@ -155,14 +201,15 @@ var activity = {
                 self.tooltip.transition()
                     .duration(20)
                     .style("opacity", .9);
-                var target = d3.event.target.classList.value;
-                var text = "";
+                var target = d3.event.target.classList.value,
+                    text = "",
+                    time = "(" + moment.parseZone(d.timestamp).format("MMM-DD-YY hh:mm:sa") + ")";
                 if (target == "elLooked") {
-                    text = d.postActivity + "\n" + d.postDesc[0] + "...\n(" + moment.parseZone(d.timestamp).format("hh:mm:sa") + ")";
+                    text = d.postActivity + "\n" + d.postDesc[0] + "...\n" + time;
                 } else if (target == "elClicked") {
-                    text = d.url + "\n(" + moment.parseZone(d.timestamp).format("hh:mm:sa") + ")";
+                    text = d.url + "\n" + time;
                 } else {
-                    text = d.content + "\n(" + moment.parseZone(d.timestamp).format("hh:mm:sa") + ")";
+                    text = d.content + "\n" + time;
                 }
                 self.tooltip.text(text)
                     .style("left", (d3.event.pageX - offset) + "px")
@@ -173,6 +220,7 @@ var activity = {
                     .duration(50)
                     .style("opacity", 0);
             });
+
     }
 }
 
@@ -294,7 +342,7 @@ var nlpList = {
             $("#" + name + "-container .Rtable")
                 .append($("<div>", { class: "cell looked-text" }).text(_.round(item.score, 2)))
                 .append($("<div>", { class: "cell" }).text(categoriesArr[1] + " /") // because [0] = ""
-                    .append($("<p>").text(_.takeRight(categoriesArr, categoriesArr.length-2).join(" / ")))
+                    .append($("<p>").text(_.takeRight(categoriesArr, categoriesArr.length - 2).join(" / ")))
                 );
         });
     },
@@ -1085,6 +1133,8 @@ var main = {
             overflow: 'hidden',
             height: '100%'
         });
+
+        $("#days-increment").attr("type", "number");
 
         $("#progressAnim").stop().animate({
             width: window.innerWidth - 20
