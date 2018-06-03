@@ -37,13 +37,16 @@
         color: #000;
     }
 
-    #update-chrome, #update-firefox {
+    #update-chrome,
+    #update-firefox {
         display: none;
     }
 
-    .update span {
+    .update span,
+    .update a {
         color: #21FF06;
         background-color: #000;
+        padding: 1px 3px;
     }
     </style>
 </head>
@@ -56,6 +59,7 @@
             <br>At the top right, check <i>"Developer Mode"</i>. Right below, click <i>"Update extensions now"</i>.
         </p>
         <hr>
+        <p>The Data Selfie server will be shut down on July 1, 2018. The extension can still track your activity for you, but won't give you new predictions <a href="https://dataselfie.it/shutdown">Read more about it here.</a> </p>
     </div>
     <div class="update" id="update-firefox">
         <p><span>There is a new update available.
@@ -65,6 +69,10 @@
         <hr>
     </div>
     <p id="status">Collect and analyze data from your interactions on facebook.com.</p>
+    <hr>
+    <p class="update">The Data Selfie server will be
+        <br><span>shut down on July 1, 2018</span>.
+        <br>The extension can still track your activity for you and save the data on your computer, but won't give you new predictions. <a href="https://dataselfie.it/shutdown">Read more</a> </p>
     <button id="me" inactive>Your Data Selfie</button>
     <button id="manage">Manage Your Data</button>
     <button id="options">Options</button>

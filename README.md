@@ -46,8 +46,7 @@ Work in progress. Some information might not apply.
 - to make a build and watch for changes ```npm run buildw```
 - to make a build and minify etc (see webpack.config.js) ```npm run buildprod```
     - use this to reproduce the code submitted to Chrome Web Store and Firefox Add-ons
-    - for Chrome the build folder is compressed and submitted
-    - for Firefox the content of the build folder is compressed and submitted
+    - for both Chrome and Firefox the content of the build folder is compressed and submitted to the developer platform
 
 #### Chrome extension
 
